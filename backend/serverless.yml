@@ -1,13 +1,14 @@
 service:
-  name: backend
+  name: location-snap
 # app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+app: location-snap
+org: willsamuel
 
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+  databaseSecret: ${ssm:/aws/reference/secretsmanager/${self:provider.environment.RDS_DBC_SECRET_ID}~true}
 
 # Add the serverless-webpack plugin
 plugins:
@@ -16,10 +17,30 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
+  memorySize: 512
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-central-1'}
+
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    RDS_DBC_SECRET_ID: snap-rds-key-${self:provider.stage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+      Resource: !Ref RDSDBCKey
+    - Effect: Allow
+      Action:
+        - kms:Decrypt
+      Resource: !GetAtt KMSKey.Arn
+
+# ---------------------------------------------------------------------------- #
+#                                   FUNCTIONS                                  #
+# ---------------------------------------------------------------------------- #
 
 functions:
   hello:
@@ -28,3 +49,79 @@ functions:
       - http:
           method: get
           path: hello
+
+# ---------------------------------------------------------------------------- #
+#                                   RESOURCES                                  #
+# ---------------------------------------------------------------------------- #
+
+resources:
+  Resources:
+    RDSCluster:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        MasterUsername: ${self:custom.databaseSecret.username}
+        MasterUserPassword: ${self:custom.databaseSecret.password}
+        DBClusterIdentifier: my-location-snap-cluster
+        EnableHttpEndpoint: true
+        Engine: aurora-postgresql
+        EngineMode: serverless
+        EngineVersion: "10.7"
+        ScalingConfiguration:
+          AutoPause: true
+          MinCapacity: 2
+          MaxCapacity: 4
+          SecondsUntilAutoPause: 1000
+
+    KMSKey:
+      Type: AWS::KMS::Key
+      Properties:
+        Description: KMS key for RDS DB Cluster
+        KeyPolicy:
+          Version: "2012-10-17"
+          Id: location-snap-rds-db-cluster-${self:provider.stage}
+          Statement:
+            - Sid: Allow administration of the key
+              Effect: Allow
+              Principal:
+                AWS:
+                  Fn::Join:
+                    - ":"
+                    - - "arn:aws:iam:"
+                      - Ref: AWS::AccountId
+                      - "root"
+              Action:
+                - "kms:*"
+              Resource: "*"
+
+    KMSKeyAlias:
+      Type: AWS::KMS::Alias
+      Properties:
+        AliasName: alias/snap-rds-key-${self:provider.stage}
+        TargetKeyId: !Ref KMSKey
+
+    RDSDBCKey:
+      Type: AWS::SecretsManager::Secret
+      Properties:
+        Name: ${self:provider.environment.RDS_DBC_SECRET_ID}
+        KmsKeyId: !Ref KMSKey
+
+# ---------------------------------------------------------------------------- #
+#                                   PARAMETER                                  #
+# ---------------------------------------------------------------------------- #
+Parameters:
+  DBUsername:
+    NoEcho: "true"
+    Description: Username for PostgreSQL database access
+    Type: String
+    MinLength: "1"
+    MaxLength: "16"
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DBPassword:
+    NoEcho: "true"
+    Description: Password PostgreSQL database access
+    Type: String
+    MinLength: "8"
+    MaxLength: "41"
+    AllowedPattern: "[a-zA-Z0-9]*"
+    ConstraintDescription: must contain only alphanumeric characters.
