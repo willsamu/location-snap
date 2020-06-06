@@ -8,7 +8,7 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
-  databaseSecret: ${ssm:/aws/reference/secretsmanager/${self:provider.environment.RDS_DBC_SECRET_ID}~true}
+  databaseSecret: ${ssm:/aws/reference/secretsmanager/snap-rds-key~true}
 
 # Add the serverless-webpack plugin
 plugins:
@@ -26,7 +26,7 @@ provider:
 
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-    RDS_DBC_SECRET_ID: snap-rds-key-${self:provider.stage}
+    RDS_DBC_SECRET_ID: snap-rds-key
 
   iamRoleStatements:
     - Effect: Allow
@@ -61,7 +61,7 @@ resources:
       Properties:
         MasterUsername: ${self:custom.databaseSecret.username}
         MasterUserPassword: ${self:custom.databaseSecret.password}
-        DBClusterIdentifier: my-location-snap-cluster
+        DBClusterIdentifier: location-snap-cluster
         EnableHttpEndpoint: true
         Engine: aurora-postgresql
         EngineMode: serverless
@@ -69,7 +69,7 @@ resources:
         ScalingConfiguration:
           AutoPause: true
           MinCapacity: 2
-          MaxCapacity: 4
+          MaxCapacity: 2
           SecondsUntilAutoPause: 1000
 
     KMSKey:
@@ -96,7 +96,7 @@ resources:
     KMSKeyAlias:
       Type: AWS::KMS::Alias
       Properties:
-        AliasName: alias/snap-rds-key-${self:provider.stage}
+        AliasName: alias/snap-rds-key
         TargetKeyId: !Ref KMSKey
 
     RDSDBCKey:
