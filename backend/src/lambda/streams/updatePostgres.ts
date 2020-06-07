@@ -10,6 +10,7 @@ import { cors } from "middy/middlewares";
 // import { secretsManager } from "middy/middlewares";
 import { LocationRequest } from "../../requests/LocationRequest";
 import { createLogger } from "../../utils/logger";
+import { ExecuteStatementRequest } from "aws-sdk/clients/rdsdataservice";
 
 const RDS = new AWS.RDSDataService();
 const logger = createLogger("WriteLocationToPostgres");
@@ -36,12 +37,19 @@ export const handler = middy(async (event) => {
 
   // The Lambda environment variables for the Aurora Cluster Arn, Database Name, and the AWS Secrets Arn hosting the master credentials of the serverless db
 
-  const params = {
-    awsSecretStoreArn: DBSecretsStoreArn,
-    dbClusterOrInstanceArn: DBAuroraClusterArn,
-    sqlStatements: sqlStatement,
+  //   const params = {
+  //     awsSecretStoreArn: DBSecretsStoreArn,
+  //     dbClusterOrInstanceArn: DBAuroraClusterArn,
+  //     sqlStatements: sqlStatement,
+  //     database: databaseName,
+  //   };
+  const params: ExecuteStatementRequest = {
     database: databaseName,
+    resourceArn: DBAuroraClusterArn,
+    secretArn: DBSecretsStoreArn,
+    sql: sqlStatement,
   };
+
   console.log(
     `Params:${JSON.stringify(
       params,
