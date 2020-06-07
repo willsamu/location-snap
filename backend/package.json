@@ -7,10 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "middy": "^0.36.0",
     "source-map-support": "^0.5.10"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.17",
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^10.12.18",
     "fork-ts-checker-webpack-plugin": "^3.0.1",
     "serverless-webpack": "^5.2.0",
