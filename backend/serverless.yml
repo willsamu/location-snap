@@ -27,6 +27,10 @@ provider:
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     RDS_DBC_SECRET_ID: snap-rds-key
+    SECRET_STORE_ARN: !Ref RDSDBCKey
+    AURORA_CLUSTER_ARN: !Ref RDSCluster
+    DATABASE_NAME: postgres # TODO: Change to "Location" once post deploy lambda is available
+    LOCATION_TABLE_NAME: userLocation
 
   iamRoleStatements:
     - Effect: Allow
@@ -37,6 +41,29 @@ provider:
       Action:
         - kms:Decrypt
       Resource: !GetAtt KMSKey.Arn
+      #* SecretsManagerDbCredentialAccess
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+        - secretsmanager:PutResourcePolicy
+        - secretsmanager:PutSecretValue
+        - secretsmanager:DeleteSecret
+        - secretsmanager:DescribeSecret
+        - secretsmanager:TagResource
+      Resource: !Ref RDSDBCKey
+      #* Data Service Access
+    - Effect: Allow
+      Action:
+        - secretsmanager:CreateSecret
+        - secretsmanager:ListSecrets
+        - secretsmanager:GetRandomPassword
+        - tag:GetResources
+        - rds-data:BatchExecuteStatement
+        - rds-data:BeginTransaction
+        - rds-data:CommitTransaction
+        - rds-data:ExecuteStatement
+        - rds-data:RollbackTransaction
+      Resource: "*"
 
 # ---------------------------------------------------------------------------- #
 #                                   FUNCTIONS                                  #
@@ -49,6 +76,13 @@ functions:
       - http:
           method: get
           path: hello
+
+  writeToPostgres:
+    handler: src/lambda/streams/updatePostgres.handler
+    events:
+      - http:
+          method: get
+          path: writepg
 
 # ---------------------------------------------------------------------------- #
 #                                   RESOURCES                                  #
