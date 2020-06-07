@@ -37,12 +37,6 @@ export const handler = middy(async (event) => {
 
   // The Lambda environment variables for the Aurora Cluster Arn, Database Name, and the AWS Secrets Arn hosting the master credentials of the serverless db
 
-  //   const params = {
-  //     awsSecretStoreArn: DBSecretsStoreArn,
-  //     dbClusterOrInstanceArn: DBAuroraClusterArn,
-  //     sqlStatements: sqlStatement,
-  //     database: databaseName,
-  //   };
   const params: ExecuteStatementRequest = {
     database: databaseName,
     resourceArn: DBAuroraClusterArn,
@@ -57,7 +51,7 @@ export const handler = middy(async (event) => {
   );
 
   try {
-    let dbResponse = await RDS.executeStatement(params);
+    let dbResponse = await RDS.executeStatement(params).promise();
     logger.info("Response Object: ", dbResponse);
     // logger.info("Recieved response from Postgres: ", {
     //   result: JSON.stringify(dbResponse, null, 2),
@@ -69,19 +63,6 @@ export const handler = middy(async (event) => {
     return { statusCode: 400, body: error };
   }
 });
-
-// handler.use(
-//   secretsManager({
-//     awsSdkOptions: { region: "us-east-1" },
-//     cache: true,
-//     cacheExpiryInMillis: 60000,
-//     // Throw an error if can't read the secret
-//     throwOnFailedCall: true,
-//     secrets: {
-//       AUTH0_SECRET: secretId,
-//     },
-//   }),
-// );
 
 const validateInput = (locationObject: LocationRequest) => {
   try {
