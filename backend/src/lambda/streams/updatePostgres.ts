@@ -34,6 +34,7 @@ export const handler = middy(async (event) => {
     };
 
   var sqlStatement = `SELECT * FROM ${tableName}`;
+  //   INSERT INTO picture_location (geom, PictureId) VALUES (ST_SetSRID(ST_MakePoint(54.0056, 55.036),4326), 'c7af6d4d-8a8d-424b-b801-4f487b216915');
 
   // The Lambda environment variables for the Aurora Cluster Arn, Database Name, and the AWS Secrets Arn hosting the master credentials of the serverless db
 
