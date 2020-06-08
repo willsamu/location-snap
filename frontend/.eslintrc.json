@@ -1,0 +1,36 @@
+{
+  "extends": [
+    "airbnb-typescript",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended",
+    "plugin:react/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "ecmaVersion": 2020, // Allows for the parsing of modern ECMAScript features
+    "sourceType": "module", // Allows for the use of imports
+    "ecmaFeatures": {
+      "jsx": true // Allows for the parsing of JSX
+    }
+  },
+  "rules": {
+    "prettier/prettier": ["error"],
+    "react/jsx-filename-extension": 0,
+    "react/forbid-prop-types": 0,
+    "react/jsx-one-expression-per-line": 0,
+    "object-literal-key-quotes": 0,
+    "import/prefer-default-export": 1,
+    "react/react-in-jsx-scope": 0
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"]
+      }
+    },
+    "react": {
+      "version": "detect"
+    }
+  }
+}
