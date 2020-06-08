@@ -97,6 +97,8 @@ functions:
 
   getDataInRange:
     handler: src/lambda/http/getDataInRange.handler
+    timeout: 60 # in case of aurora cluster resuming
+    memorySize: 128
     events:
       - http:
           method: get
