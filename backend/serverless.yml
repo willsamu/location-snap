@@ -40,8 +40,12 @@ provider:
     SECRET_STORE_ARN: !Ref RDSDBCKey
     AURORA_CLUSTER_ARN: arn:aws:rds:${self:provider.region}:#{AWS::AccountId}:cluster:${self:custom.clusterIdentifier}
     DATABASE_NAME: postgres # TODO: Change to "Location" once post deploy lambda is available
-    LOCATION_TABLE_NAME: picture_location
-    SEEN_TABLE_NAME: picture_seen
+    LOCATION_TABLE_NAME: picture_location_${self:provider.stage}
+    SEEN_TABLE_NAME: picture_seen_${self:provider.stage}
+    PICTURE_DATA_TABLE: pictures-${self:provider.stage}
+    PICTURE_DATA_CREATED_AT_INDEX: pictures-index-createdAt
+    PICTURE_BUCKET: location-snap-pictures-${self:provider.stage}
+    URL_EXPIRATION_TIME: 3000
 
   iamRoleStatements:
     - Effect: Allow
@@ -103,6 +107,7 @@ functions:
       - http:
           method: get
           path: data
+
   setPictureSeen:
     handler: src/lambda/http/setPictureSeen.handler
     events:
@@ -123,6 +128,16 @@ functions:
 
 resources:
   Resources:
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
     RDSCluster:
       Type: AWS::RDS::DBCluster
       Properties:
@@ -171,6 +186,65 @@ resources:
       Properties:
         Name: ${self:provider.environment.RDS_DBC_SECRET_ID}
         KmsKeyId: !Ref KMSKey
+
+    PictureTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: pictureId
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: pictureId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.PICTURE_DATA_TABLE}
+        LocalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.PICTURE_DATA_CREATED_AT_INDEX}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL # What attributes will be copied to an index
+
+    PictureBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.PICTURE_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: "*"
+              Action: "s3:GetObject"
+              Resource: "arn:aws:s3:::${self:provider.environment.PICTURE_BUCKET}/*"
+        Bucket: !Ref PictureBucket
 
 # ---------------------------------------------------------------------------- #
 #                                   PARAMETER                                  #

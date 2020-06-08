@@ -1,7 +1,10 @@
 import * as AWS from "aws-sdk";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
-import { ExecuteStatementRequest } from "aws-sdk/clients/rdsdataservice";
+import {
+  ExecuteStatementRequest,
+  SqlRecords,
+} from "aws-sdk/clients/rdsdataservice";
 import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
 
 import { createLogger } from "../../utils/logger";
@@ -18,20 +21,22 @@ var seenTableName = process.env.SEEN_TABLE_NAME;
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    // const parameter = event.body;
-    console.log(
-      "E V E N T:\n",
-      event.body,
-      validateInput({ lat: "54", lon: "55" }),
-    );
     // TODO: Replace Mocked Data
-    // const userLocation: LocationRequest = JSON.parse(event.body);
-    const userLocation: LocationRequest = { lat: "54", lon: "55" };
-    const rangeInMeter = 10 ** 4;
+
+    const userLocation: LocationRequest = validateInput(event);
+    if (!userLocation)
+      return {
+        statusCode: 400,
+        body: "Invalid/Malformed Location Data Input",
+      };
+
+    logger.info("Request passed: ", userLocation);
+    // const userLocation: LocationRequest = { lat: "54", lon: "55" };
+    const rangeInMeter = userLocation.range * 10 ** 3;
     const userId = "1";
 
     const getDataInRange = `
-      SELECT PictureId FROM ${locationTableName} 
+      SELECT PictureId, ST_Distance(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography) FROM ${locationTableName} 
       WHERE
         ST_DWithin(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography, ${rangeInMeter})
         AND 
@@ -43,6 +48,7 @@ export const handler = middy(
             AND
             ${seenTableName}.SeenBy = ${userId}::VARCHAR(64)
         )
+      LIMIT 100  
       ;  
     `;
 
@@ -56,26 +62,58 @@ export const handler = middy(
     try {
       let dbResponse = await RDS.executeStatement(params).promise();
       logger.info("Result: ", dbResponse);
-      return { statusCode: 200, body: JSON.stringify(dbResponse) };
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(transformResult(dbResponse)),
+      };
     } catch (error) {
       logger.error(`Error executing sql request: ${error}`);
       return { statusCode: 400, body: JSON.stringify(error) };
     }
   },
 );
-
-const validateInput = (locationObject: LocationRequest) => {
+/**
+ * @description Validates Request Input and Prevents SQL Injection
+ */
+function validateInput(event: APIGatewayProxyEvent): LocationRequest {
   try {
-    const latitude = parseFloat(locationObject.lat);
-    if (latitude > 180 || latitude < 0)
+    const range = parseInt(event.queryStringParameters.range, 10);
+    const lat = event.queryStringParameters.lat;
+    const lon = event.queryStringParameters.lon;
+    if (!(range || lat || lon)) return null;
+    logger.info("Recieved parameters", { range, lat, lon });
+
+    const latitude = parseFloat(lat);
+    if (latitude > 180 || latitude < -180)
       throw new Error(`Invalid Latitude input!`);
-    const longitude = parseFloat(locationObject.lon);
-    if (longitude > 90 || longitude < 0)
+    const longitude = parseFloat(lon);
+    if (longitude > 90 || longitude < -90)
       throw new Error("Invalid Longitude input!");
-    return { latitude: latitude.toString(), longitude: longitude.toString() };
+    if (range < 0) throw new Error("Invalid Request Range");
+    return {
+      lat: latitude.toString(),
+      lon: longitude.toString(),
+      range: range,
+    };
   } catch (e) {
+    logger.error(`INPUT ERROR: ${e}`);
     return null;
   }
-};
+}
+
+function transformResult(
+  response: AWS.RDSDataService.ExecuteStatementResponse,
+) {
+  if (response.records && response.records.length > 0) {
+    const body: SqlRecords = [];
+    for (let record of response.records) {
+      body.push(record[0].stringValue);
+      logger.info("Result", record);
+    }
+    return body;
+  }
+  return response;
+}
 
 handler.use(cors({ credentials: true }));
