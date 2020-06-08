@@ -9,6 +9,7 @@ import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
 
 import { createLogger } from "../../utils/logger";
 import { LocationRequest } from "../../requests/LocationRequest";
+import { DataInRange } from "../../models/DataInRange";
 
 const RDS = new AWS.RDSDataService();
 const logger = createLogger("GetDataInRange");
@@ -106,14 +107,17 @@ function transformResult(
   response: AWS.RDSDataService.ExecuteStatementResponse,
 ) {
   if (response.records && response.records.length > 0) {
-    const body: SqlRecords = [];
+    const body: DataInRange = [];
     for (let record of response.records) {
-      body.push(record[0].stringValue);
+      body.push({
+        id: record[0].stringValue,
+        distance: (record[1].doubleValue / 1000) | 0, // Parse as integer
+      });
       logger.info("Result", record);
     }
     return body;
   }
-  return response;
+  return [];
 }
 
 handler.use(cors({ credentials: true }));
