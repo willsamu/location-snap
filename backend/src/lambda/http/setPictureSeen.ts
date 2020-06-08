@@ -25,7 +25,7 @@ export const handler = middy(
     const userId = 1;
 
     const setPictureSeenMutation = `
-        INSERT INTO ${seenTableName} (SeenBy, PictureId) VALUES (${userId}, ${pictureId});
+      INSERT INTO ${seenTableName} (SeenBy, PictureId) VALUES (${userId}, ${pictureId});
     `;
 
     let params: ExecuteStatementRequest = {

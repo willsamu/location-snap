@@ -31,19 +31,19 @@ export const handler = middy(
     const userId = "1";
 
     const getDataInRange = `
-        SELECT PictureId FROM ${locationTableName} 
-        WHERE
-          ST_DWithin(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography, ${rangeInMeter})
-          AND 
-          NOT EXISTS (
-            SELECT 1
-            FROM ${seenTableName}
-            WHERE
-              ${seenTableName}.PictureId = ${locationTableName}.PictureId
-              AND
-              ${seenTableName}.SeenBy = ${userId}::VARCHAR(64)
-          )
-        ;  
+      SELECT PictureId FROM ${locationTableName} 
+      WHERE
+        ST_DWithin(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography, ${rangeInMeter})
+        AND 
+        NOT EXISTS (
+          SELECT 1
+          FROM ${seenTableName}
+          WHERE
+            ${seenTableName}.PictureId = ${locationTableName}.PictureId
+            AND
+            ${seenTableName}.SeenBy = ${userId}::VARCHAR(64)
+        )
+      ;  
     `;
 
     let params: ExecuteStatementRequest = {

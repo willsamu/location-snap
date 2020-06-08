@@ -18,12 +18,12 @@ var seenTableName = process.env.SEEN_TABLE_NAME;
 export const handler = middy(
   async (): Promise<APIGatewayProxyResult> => {
     const installExtensions = `
-    CREATE EXTENSION IF NOT EXISTS postgis;
-    CREATE EXTENSION IF NOT EXISTS postgis_topology;
-    CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
-    CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder;
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-    CREATE EXTENSION IF NOT EXISTS btree_gist;
+      CREATE EXTENSION IF NOT EXISTS postgis;
+      CREATE EXTENSION IF NOT EXISTS postgis_topology;
+      CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
+      CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder;
+      CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+      CREATE EXTENSION IF NOT EXISTS btree_gist;
     `;
 
     let params: ExecuteStatementRequest = {
@@ -45,20 +45,20 @@ export const handler = middy(
     }
 
     const createTable = `
-    CREATE TABLE IF NOT EXISTS ${locationTableName} (
-        PictureId uuid,
-        geom GEOMETRY(Point, 4326)
-    );
-    
-    CREATE INDEX IF NOT EXISTS ${locationTableName}_gix ON ${locationTableName} USING GIST (geom);
-    
-    CREATE TABLE IF NOT EXISTS ${seenTableName} (
-        id SERIAL PRIMARY KEY,
-        PictureId uuid,
-        SeenBy VARCHAR(64)
-    );
-    
-    CREATE INDEX IF NOT EXISTS ${seenTableName}_gix ON ${seenTableName} USING GIST (PictureId);
+      CREATE TABLE IF NOT EXISTS ${locationTableName} (
+          PictureId uuid,
+          geom GEOMETRY(Point, 4326)
+      );
+      
+      CREATE INDEX IF NOT EXISTS ${locationTableName}_gix ON ${locationTableName} USING GIST (geom);
+      
+      CREATE TABLE IF NOT EXISTS ${seenTableName} (
+          id SERIAL PRIMARY KEY,
+          PictureId uuid,
+          SeenBy VARCHAR(64)
+      );
+      
+      CREATE INDEX IF NOT EXISTS ${seenTableName}_gix ON ${seenTableName} USING GIST (PictureId);
     `;
 
     params.sql = createTable;
