@@ -70,7 +70,7 @@ function getUploadUrl(pictureId: string) {
   return s3.getSignedUrl("putObject", {
     Bucket: pictureBucket,
     Key: pictureId,
-    Expires: urlExpirationTime,
+    Expires: parseInt(urlExpirationTime, 10),
   });
 }
 
