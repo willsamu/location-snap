@@ -14,6 +14,7 @@ var DBSecretsStoreArn = process.env.SECRET_STORE_ARN;
 var DBAuroraClusterArn = process.env.AURORA_CLUSTER_ARN;
 var databaseName = process.env.DATABASE_NAME;
 var locationTableName = process.env.LOCATION_TABLE_NAME;
+var seenTableName = process.env.SEEN_TABLE_NAME;
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -23,18 +24,26 @@ export const handler = middy(
       event.body,
       validateInput({ lat: "54", lon: "55" }),
     );
+    // TODO: Replace Mocked Data
     // const userLocation: LocationRequest = JSON.parse(event.body);
     const userLocation: LocationRequest = { lat: "54", lon: "55" };
     const rangeInMeter = 10 ** 4;
+    const userId = "1";
 
-    // SELECT * FROM ${locationTableName}
-    // WHERE ST_DWithin(
-    //     geom,
-    //     ST_GeomFromText('POINT(0 0)', 4326),
-    //     1000
-    // );
     const getDataInRange = `
-        SELECT PictureId FROM ${locationTableName} WHERE ST_DWithin(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography, ${rangeInMeter});  
+        SELECT PictureId FROM ${locationTableName} 
+        WHERE
+          ST_DWithin(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography, ${rangeInMeter})
+          AND 
+          NOT EXISTS (
+            SELECT 1
+            FROM ${seenTableName}
+            WHERE
+              ${seenTableName}.PictureId = ${locationTableName}.PictureId
+              AND
+              ${seenTableName}.SeenBy = ${userId}::VARCHAR(64)
+          )
+        ;  
     `;
 
     let params: ExecuteStatementRequest = {
