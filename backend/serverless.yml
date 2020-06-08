@@ -101,6 +101,12 @@ functions:
       - http:
           method: get
           path: data
+  setPictureSeen:
+    handler: src/lambda/http/setPictureSeen.handler
+    events:
+      - http:
+          method: post
+          path: pictures/{pictureId}
   # ! Post deployment function
   setupPostgrisTable:
     handler: src/deployment/setupPostgres.handler
