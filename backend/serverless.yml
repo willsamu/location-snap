@@ -8,6 +8,13 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+  scripts:
+    commands:
+      hello: echo Hello from ${self:service} service!
+    hooks:
+      "deploy:finalize": sls invoke -f setupPostgrisTable
+
+  #* References
   databaseSecret: ${ssm:/aws/reference/secretsmanager/snap-rds-key~true}
   clusterIdentifier: location-snap-cluster
 
@@ -15,6 +22,7 @@ custom:
 plugins:
   - serverless-webpack
   - serverless-pseudo-parameters
+  - serverless-plugin-scripts
 
 provider:
   name: aws
@@ -32,7 +40,8 @@ provider:
     SECRET_STORE_ARN: !Ref RDSDBCKey
     AURORA_CLUSTER_ARN: arn:aws:rds:${self:provider.region}:#{AWS::AccountId}:cluster:${self:custom.clusterIdentifier}
     DATABASE_NAME: postgres # TODO: Change to "Location" once post deploy lambda is available
-    LOCATION_TABLE_NAME: userLocation
+    LOCATION_TABLE_NAME: picture_location
+    SEEN_TABLE_NAME: picture_seen
 
   iamRoleStatements:
     - Effect: Allow
@@ -86,6 +95,12 @@ functions:
           method: get
           path: writepg
 
+  getDataInRange:
+    handler: src/lambda/http/getDataInRange.handler
+    events:
+      - http:
+          method: get
+          path: data
   # ! Post deployment function
   setupPostgrisTable:
     handler: src/deployment/setupPostgres.handler
