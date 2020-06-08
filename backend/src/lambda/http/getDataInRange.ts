@@ -1,10 +1,7 @@
 import * as AWS from "aws-sdk";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
-import {
-  ExecuteStatementRequest,
-  SqlRecords,
-} from "aws-sdk/clients/rdsdataservice";
+import { ExecuteStatementRequest } from "aws-sdk/clients/rdsdataservice";
 import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
 
 import { createLogger } from "../../utils/logger";
