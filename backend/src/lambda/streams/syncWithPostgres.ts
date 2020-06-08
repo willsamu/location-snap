@@ -7,8 +7,6 @@
 import * as AWS from "aws-sdk";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
-// import { secretsManager } from "middy/middlewares";
-import { LocationRequest } from "../../requests/LocationRequest";
 import { createLogger } from "../../utils/logger";
 import { ExecuteStatementRequest } from "aws-sdk/clients/rdsdataservice";
 import { DynamoDBStreamEvent } from "aws-lambda";

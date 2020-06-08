@@ -3,12 +3,24 @@ import * as middy from "middy";
 import { cors } from "middy/middlewares";
 import { ExecuteStatementRequest } from "aws-sdk/clients/rdsdataservice";
 import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
+import * as https from "https";
 
 import { createLogger } from "../../utils/logger";
 import { LocationRequest } from "../../requests/LocationRequest";
 import { DataInRange } from "../../models/DataInRange";
 
-const RDS = new AWS.RDSDataService();
+const sslAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 50,
+  rejectUnauthorized: true,
+});
+
+AWS.config.update({ httpOptions: { agent: sslAgent } });
+
+let RDS = null;
+
+if (!RDS) RDS = new AWS.RDSDataService();
+
 const logger = createLogger("GetDataInRange");
 
 var DBSecretsStoreArn = process.env.SECRET_STORE_ARN;

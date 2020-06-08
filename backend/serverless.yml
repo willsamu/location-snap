@@ -12,7 +12,7 @@ custom:
     commands:
       hello: echo Hello from ${self:service} service!
     hooks:
-      "deploy:finalize": sls invoke -f setupPostgrisTable
+      "deploy:finalize": sls invoke -f setupPostgresTable
 
   #* References
   databaseSecret: ${ssm:/aws/reference/secretsmanager/snap-rds-key~true}
@@ -60,19 +60,10 @@ provider:
     - Effect: Allow
       Action:
         - secretsmanager:GetSecretValue
-        - secretsmanager:PutResourcePolicy
-        - secretsmanager:PutSecretValue
-        - secretsmanager:DeleteSecret
-        - secretsmanager:DescribeSecret
-        - secretsmanager:TagResource
       Resource: !Ref RDSDBCKey
       #* Data Service Access
     - Effect: Allow
       Action:
-        - secretsmanager:CreateSecret
-        - secretsmanager:ListSecrets
-        - secretsmanager:GetRandomPassword
-        - tag:GetResources
         - rds-data:BatchExecuteStatement
         - rds-data:BeginTransaction
         - rds-data:CommitTransaction
@@ -131,14 +122,10 @@ functions:
           method: put
           path: pictures
   # ! Post deployment function
-  setupPostgrisTable:
+  setupPostgresTable:
     handler: src/deployment/setupPostgres.handler
     timeout: 60
     memorySize: 128
-    events:
-      - http:
-          method: put
-          path: postgres
 
 # ---------------------------------------------------------------------------- #
 #                                   RESOURCES                                  #
