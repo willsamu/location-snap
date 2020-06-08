@@ -99,12 +99,14 @@ functions:
           method: get
           path: hello
 
-  writeToPostgres:
-    handler: src/lambda/streams/updatePostgres.handler
+  syncWithPostgres:
+    handler: src/lambda/streams/syncWithPostgres.handler
+    timeout: 60
+    memorySize: 128
     events:
-      - http:
-          method: get
-          path: writepg
+      - stream:
+          type: dynamodb
+          arn: !GetAtt PictureTable.StreamArn
 
   getDataInRange:
     handler: src/lambda/http/getDataInRange.handler
@@ -167,8 +169,8 @@ resources:
         ScalingConfiguration:
           AutoPause: true
           MinCapacity: 2
-          MaxCapacity: 2
-          SecondsUntilAutoPause: 1000
+          MaxCapacity: 4
+          SecondsUntilAutoPause: 900
 
     KMSKey:
       Type: AWS::KMS::Key
@@ -229,6 +231,8 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL # What attributes will be copied to an index
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
 
     PictureBucket:
       Type: AWS::S3::Bucket
