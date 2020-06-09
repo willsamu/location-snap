@@ -2,6 +2,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react'
 
 import { Container } from './home.styled'
 import Card from '../Card/Card.recact'
+import { useLocation } from 'react-router-dom'
 
 type HomeProps = {
   auth?: any
@@ -24,13 +25,14 @@ const Home: FunctionComponent<HomeProps> = ({ auth }) => {
     { id: '1', distance: 2 },
     { id: '2', distance: 5 },
   ])
+  const location = useLocation()
 
   useEffect(() => {
+    console.log('Location: ', location, auth.isAuthenticated())
     if (!position) {
       getPosition(setPosition)
     } else console.log('Position: ', position)
   }, [position])
-  //   console.log('Auth: ', auth.getAccessToken())
 
   return (
     <Container>
