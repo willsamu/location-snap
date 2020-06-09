@@ -13,6 +13,19 @@ custom:
       hello: echo Hello from ${self:service} service!
     hooks:
       "deploy:finalize": sls invoke -f setupPostgresTable
+  # documentation:
+  #   api:
+  #     info:
+  #       version: v1.0.0
+  #       title: Lambda Todo APi
+  #       description: Serverless Todo List Application
+  #   models:
+  #     - name: CreateTodoRequest
+  #       contentType: application/json
+  #       schema: ${file(models/create-todo-request.json)}
+  #     - name: UpdateTodoRequest
+  #       contentType: application/json
+  #       schema: ${file(models/update-todo-request.json)}
 
   #* References
   databaseSecret: ${ssm:/aws/reference/secretsmanager/snap-rds-key~true}
@@ -28,8 +41,12 @@ provider:
   name: aws
   runtime: nodejs12.x
   memorySize: 256
-  apiGateway:
-    minimumCompressionSize: 512 # Enable gzip compression for responses > 1 KB
+  # apiGateway:
+  #   minimumCompressionSize: 512 # Enable gzip compression for responses > 1 KB
+  #   Cors:
+  #     AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+  #     AllowHeaders: "'Content-Type,X-Amz-Date,X-Amz-Security-Token,Authorization,X-Api-Key,X-Requested-With,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'"
+  #     AllowOrigin: "'*'"
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'eu-central-1'}
@@ -133,6 +150,7 @@ functions:
           method: put
           path: pictures
           cors: true
+
   # ! Post deployment function
   setupPostgresTable:
     handler: src/deployment/setupPostgres.handler
@@ -151,10 +169,11 @@ resources:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT'"
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
+
     RDSCluster:
       Type: AWS::RDS::DBCluster
       Properties:

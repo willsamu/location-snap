@@ -1,21 +1,42 @@
-// import { apiEndpoint } from '../config'
-// import { Todo } from '../types/Todo'
+import { apiEndpoint } from '../config'
+import { SnapItem, SnapResult } from '../types/Snap'
 // import { CreateTodoRequest } from '../types/CreateTodoRequest'
-// import Axios from 'axios'
+import Axios, { AxiosRequestConfig } from 'axios'
+import * as AxiosLogger from 'axios-logger'
+import { GetSnapsReqest } from 'types/Requests'
 // import { UpdateTodoRequest } from '../types/UpdateTodoRequest'
 
-// export async function getTodos(idToken: string): Promise<Todo[]> {
-//   console.log('Fetching todos')
+// const axios = Axios.create()
+// axios.interceptors.request.use(AxiosLogger.requestLogger)
 
-//   const response = await Axios.get(`${apiEndpoint}/todos`, {
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${idToken}`,
-//     },
-//   })
-//   console.log('Todos:', response.data)
-//   return response.data.items
-// }
+export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise<SnapResult[]> {
+  if (idToken) {
+    console.log(`Fetching Snaps available.. ${idToken.length} | ${JSON.stringify(params)}`)
+    try {
+      const response = await Axios.get(
+        //   const response = await fetch(
+        // `${apiEndpoint}/data?range=${params.range}&lat=${params.lat}&lon=${params.lon}`,
+        `${apiEndpoint}/todos`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+        },
+      )
+      //   console.log('Respnose: ', response.json())
+      //   return response.json()
+      console.log('Snaps:', response.data)
+      if (response.data.statusCode === 400) return [] // TODO: Proper Error handling
+      return response.data.items
+    } catch (e) {
+      console.log(`Error: ${e}`)
+      return [{ id: '-1', distance: -1 }]
+    }
+  }
+  console.log('No token provided')
+  return []
+}
 
 // export async function createTodo(idToken: string, newTodo: CreateTodoRequest): Promise<Todo> {
 //   const response = await Axios.post(`${apiEndpoint}/todos`, JSON.stringify(newTodo), {

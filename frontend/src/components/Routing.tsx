@@ -7,7 +7,7 @@ import { useCookies } from 'react-cookie'
 import Callback from './Views/Callback/Callback.react'
 import createHistory from 'history/createBrowserHistory'
 import TopBar from './Views/TopBar/TopBar.react'
-import Home from './Views/Home/Home.react'
+import Home from './Views/Home/Home.connector'
 const history = createHistory()
 
 const auth = new Auth(history)
