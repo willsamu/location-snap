@@ -1,34 +1,25 @@
 import { apiEndpoint } from '../config'
 import { SnapItem, SnapResult } from '../types/Snap'
-// import { CreateTodoRequest } from '../types/CreateTodoRequest'
 import Axios, { AxiosRequestConfig } from 'axios'
 import * as AxiosLogger from 'axios-logger'
 import { GetSnapsReqest } from 'types/Requests'
-// import { UpdateTodoRequest } from '../types/UpdateTodoRequest'
 
-// const axios = Axios.create()
-// axios.interceptors.request.use(AxiosLogger.requestLogger)
+const axios = Axios.create()
+axios.interceptors.request.use(AxiosLogger.requestLogger)
 
 export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise<SnapResult[]> {
   if (idToken) {
     console.log(`Fetching Snaps available.. ${idToken.length} | ${JSON.stringify(params)}`)
     try {
-      const response = await Axios.get(
-        //   const response = await fetch(
-        // `${apiEndpoint}/data?range=${params.range}&lat=${params.lat}&lon=${params.lon}`,
-        `${apiEndpoint}/todos`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${idToken}`,
-          },
+      const response = await axios.get(`${apiEndpoint}/data?range=${params.range}&lat=34&lon=35`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
         },
-      )
-      //   console.log('Respnose: ', response.json())
-      //   return response.json()
+      })
       console.log('Snaps:', response.data)
       if (response.data.statusCode === 400) return [] // TODO: Proper Error handling
-      return response.data.items
+      return response.data.sort((a: SnapResult, b: SnapResult) => a.distance - b.distance) //TODO: return array as item key
     } catch (e) {
       console.log(`Error: ${e}`)
       return [{ id: '-1', distance: -1 }]
@@ -36,6 +27,10 @@ export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise
   }
   console.log('No token provided')
   return []
+  //   TODO:
+  // HANDLE {
+  //     "message": "Endpoint request timed out"
+  // }
 }
 
 // export async function createTodo(idToken: string, newTodo: CreateTodoRequest): Promise<Todo> {
