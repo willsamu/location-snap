@@ -8,6 +8,7 @@ import * as https from "https";
 import { createLogger } from "../../utils/logger";
 import { LocationRequest } from "../../requests/LocationRequest";
 import { DataInRange } from "../../models/DataInRange";
+import { getUserId } from "../utils";
 
 const sslAgent = new https.Agent({
   keepAlive: true,
@@ -40,10 +41,9 @@ export const handler = middy(
         body: "Invalid/Malformed Location Data Input",
       };
 
-    logger.info("Request passed: ", userLocation);
-    // const userLocation: LocationRequest = { lat: "54", lon: "55" };
     const rangeInMeter = userLocation.range * 10 ** 3;
-    const userId = "1";
+    const userId = getUserId(event);
+    logger.info("Request passed: ", [userLocation, userId]);
 
     const getDataInRange = `
       SELECT PictureId, ST_Distance(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography) FROM ${locationTableName} 
@@ -56,7 +56,7 @@ export const handler = middy(
           WHERE
             ${seenTableName}.PictureId = ${locationTableName}.PictureId
             AND
-            ${seenTableName}.SeenBy = ${userId}::VARCHAR(64)
+            ${seenTableName}.SeenBy = $id$${userId}$id$::VARCHAR(64)
         )
       LIMIT 100  
       ;  
@@ -71,7 +71,7 @@ export const handler = middy(
 
     try {
       let dbResponse = await RDS.executeStatement(params).promise();
-      logger.info("Result: ", dbResponse);
+      logger.info("Result: ", { request: params, response: dbResponse });
 
       return {
         statusCode: 200,
@@ -122,12 +122,10 @@ function transformResult(
         id: record[0].stringValue,
         distance: (record[1].doubleValue / 1000) | 0, // Parse as integer
       });
-      logger.info("Result", record);
     }
     return body;
   }
   return [];
 }
 
-// handler.use(cors({ credentials: true }));
 handler.use(cors({ credentials: true }));
