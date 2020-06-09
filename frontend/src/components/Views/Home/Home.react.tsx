@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState, useEffect } from 'react'
 
 import { Container } from './home.styled'
-import Card from '../Card/Card.recact'
+import Card from '../Card/Card.react'
 import { useLocation } from 'react-router-dom'
 import { GetSnapsReqest } from '../../../types/Requests'
 import { SnapResult } from '../../../types/Snap'

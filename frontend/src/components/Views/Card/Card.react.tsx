@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState, useEffect } from 'react'
 
-import { CardContainer, Container } from './card.styled'
+import { Button, Caption, CardContainer, Container } from './card.styled'
 
 type CardProps = {
   id: string
@@ -18,8 +18,9 @@ const Card: FunctionComponent<CardProps> = ({ id, distance }) => {
   return (
     <Container>
       <CardContainer>
-        <p>NEW PICTURE</p>
-      </CardContainer>{' '}
+        <Caption>NEW PICTURE</Caption>
+        <Button>OPEN</Button>
+      </CardContainer>
       <p>{distance} KM AWAY</p>
     </Container>
   )
