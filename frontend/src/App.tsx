@@ -1,14 +1,15 @@
-import React from 'react'
-import logo from './logo.svg'
+import React, { useState } from 'react'
+import { CookiesProvider } from 'react-cookie'
 import './App.css'
-import Home from './components/Views/Home/Home.react'
-import TopBar from 'components/Views/TopBar/TopBar.react'
+import styled from 'styled-components'
 import AuthRouter from 'components/Routing'
 
-function App() {
+const App = () => {
   return (
     <div className="App">
-      <AuthRouter />
+      <CookiesProvider>
+        <AuthRouter />
+      </CookiesProvider>
     </div>
   )
 }

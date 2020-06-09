@@ -1,6 +1,9 @@
-import React from 'react'
+import React, { useState, ChangeEvent } from 'react'
+import styled from 'styled-components'
 import Auth from '../Auth/Auth.component'
 import { Router, Route } from 'react-router-dom'
+import { useCookies } from 'react-cookie'
+
 import Callback from './Views/Callback/Callback.react'
 import createHistory from 'history/createBrowserHistory'
 import App from '../App'
@@ -18,6 +21,19 @@ const handleAuthentication = (props: any) => {
 }
 
 const AuthRouter: any = () => {
+  const [cookies, setCookie] = useCookies(['unlocked'])
+  const [isUnlocked, setIsUnlocked] = useState(cookies.unlocked)
+  const [appPassword, setAppPassword] = useState('')
+
+  const handleUnlock = () => {
+    if (appPassword === 'password') {
+      setCookie('unlocked', 'true', { path: '/' })
+      setIsUnlocked(true)
+    }
+  }
+  const onTextChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setAppPassword(event.target.value.trim())
+
   return (
     <Router history={history}>
       <div>
@@ -32,8 +48,23 @@ const AuthRouter: any = () => {
           render={(props) => {
             return (
               <div>
-                <TopBar />
-                <Home auth={auth} {...props} />
+                {isUnlocked ? (
+                  <div>
+                    <TopBar />
+                    <Home auth={auth} {...props} />
+                  </div>
+                ) : (
+                  <Container>
+                    <p>
+                      Please enter the <b>password</b> provided to you by the administrator of the
+                      page!
+                    </p>
+                    <input onChange={onTextChange}></input>
+                    <Button title="Unlock" onClick={handleUnlock}>
+                      Unlock
+                    </Button>
+                  </Container>
+                )}
               </div>
             )
           }}
@@ -44,3 +75,29 @@ const AuthRouter: any = () => {
 }
 
 export default AuthRouter
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500;
+  height: 100%;
+  flex-grow: 1;
+`
+
+const Button = styled.button`
+  flex-grow: 1;
+  align-self: center;
+  width: 160px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin: 20px;
+  height: 40px;
+  text-align: center;
+  border: none;
+  background-size: 300% 100%;
+  border-radius: 50px;
+  background-position: 100% 0;
+`
