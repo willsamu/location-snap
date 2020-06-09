@@ -129,4 +129,5 @@ function transformResult(
   return [];
 }
 
+// handler.use(cors({ credentials: true }));
 handler.use(cors({ credentials: true }));

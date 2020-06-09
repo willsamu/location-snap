@@ -34,6 +34,10 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'eu-central-1'}
 
+  # ---------------------------------------------------------------------------- #
+  #                                  ENVIRONMEN                                  #
+  # ---------------------------------------------------------------------------- #
+
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     RDS_DBC_SECRET_ID: snap-rds-key
@@ -83,12 +87,16 @@ provider:
 # ---------------------------------------------------------------------------- #
 
 functions:
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
+
   hello:
     handler: handler.hello
     events:
       - http:
           method: get
           path: hello
+          cors: true
 
   syncWithPostgres:
     handler: src/lambda/streams/syncWithPostgres.handler
@@ -107,6 +115,8 @@ functions:
       - http:
           method: get
           path: data
+          cors: true
+          authorizer: Auth
 
   setPictureSeen:
     handler: src/lambda/http/setPictureSeen.handler
@@ -114,6 +124,7 @@ functions:
       - http:
           method: post
           path: pictures/{pictureId}
+          cors: true
 
   addPicture:
     handler: src/lambda/http/addPicture.handler
@@ -121,6 +132,7 @@ functions:
       - http:
           method: put
           path: pictures
+          cors: true
   # ! Post deployment function
   setupPostgresTable:
     handler: src/deployment/setupPostgres.handler
