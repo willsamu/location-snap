@@ -26,9 +26,11 @@ const Home: FunctionComponent<HomeProps> = ({ auth }) => {
   ])
 
   useEffect(() => {
-    !position && getPosition(setPosition)
+    if (!position) {
+      getPosition(setPosition)
+    } else console.log('Position: ', position)
   }, [position])
-  console.log('Position: ', position)
+  //   console.log('Auth: ', auth.getAccessToken())
 
   return (
     <Container>
