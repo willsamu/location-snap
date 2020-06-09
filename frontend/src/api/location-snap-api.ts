@@ -17,9 +17,9 @@ export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise
           Authorization: `Bearer ${idToken}`,
         },
       })
-      console.log('Snaps:', response.data)
-      if (response.data.statusCode === 400) return [] // TODO: Proper Error handling
-      return response.data.sort((a: SnapResult, b: SnapResult) => a.distance - b.distance) //TODO: return array as item key
+      console.log('Snaps:', response)
+      if (response.status !== 200) return []
+      return response.data.items.sort((a: SnapResult, b: SnapResult) => a.distance - b.distance)
     } catch (e) {
       console.log(`Error: ${e}`)
       return [{ id: '-1', distance: -1 }]
@@ -27,10 +27,6 @@ export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise
   }
   console.log('No token provided')
   return []
-  //   TODO:
-  // HANDLE {
-  //     "message": "Endpoint request timed out"
-  // }
 }
 
 // export async function createTodo(idToken: string, newTodo: CreateTodoRequest): Promise<Todo> {

@@ -32,8 +32,6 @@ var seenTableName = process.env.SEEN_TABLE_NAME;
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    // TODO: Replace Mocked Data
-
     const userLocation: LocationRequest = validateInput(event);
     if (!userLocation)
       return {
@@ -75,7 +73,7 @@ export const handler = middy(
 
       return {
         statusCode: 200,
-        body: JSON.stringify(transformResult(dbResponse)),
+        body: JSON.stringify({ items: transformResult(dbResponse) }),
       };
     } catch (error) {
       logger.error(`Error executing sql request: ${error}`);

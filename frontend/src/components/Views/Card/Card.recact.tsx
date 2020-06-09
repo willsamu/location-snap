@@ -17,7 +17,9 @@ const Card: FunctionComponent<CardProps> = ({ id, distance }) => {
 
   return (
     <Container>
-      <CardContainer />
+      <CardContainer>
+        <p>NEW PICTURE</p>
+      </CardContainer>{' '}
       <p>{distance} KM AWAY</p>
     </Container>
   )
