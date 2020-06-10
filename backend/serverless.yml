@@ -52,38 +52,34 @@ provider:
     PICTURE_BUCKET: location-snap-pictures-${self:provider.stage}
     URL_EXPIRATION_TIME: 300
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - secretsmanager:GetSecretValue
-      Resource: !Ref RDSDBCKey
-    - Effect: Allow
-      Action:
-        - kms:Decrypt
-      Resource: !GetAtt KMSKey.Arn
-      #* SecretsManagerDbCredentialAccess
-    - Effect: Allow
-      Action:
-        - secretsmanager:GetSecretValue
-      Resource: !Ref RDSDBCKey
-      #* Data Service Access
-    - Effect: Allow
-      Action:
-        - rds-data:BatchExecuteStatement
-        - rds-data:BeginTransaction
-        - rds-data:CommitTransaction
-        - rds-data:ExecuteStatement
-        - rds-data:RollbackTransaction
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PICTURE_DATA_TABLE}
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-      Resource: arn:aws:s3:::${self:provider.environment.PICTURE_BUCKET}/*
+  # iamRoleStatements:
+  #   - Effect: Allow
+  #     Action:
+  #       - secretsmanager:GetSecretValue
+  #     Resource: !Ref RDSDBCKey
+  #   - Effect: Allow
+  #     Action:
+  #       - kms:Decrypt
+  #     Resource: !GetAtt KMSKey.Arn
+  #   - Effect: Allow
+  #     Action:
+  #       - secretsmanager:GetSecretValue
+  #     Resource: !Ref RDSDBCKey
+  #     #* Data Service Access
+  #   - Effect: Allow
+  #     Action:
+  #       - rds-data:CommitTransaction
+  #       - rds-data:ExecuteStatement
+  #     Resource: "*"
+  #   - Effect: Allow
+  #     Action:
+  #       - dynamodb:PutItem
+  #     Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PICTURE_DATA_TABLE}
+  #   - Effect: Allow
+  #     Action:
+  #       - s3:PutObject
+  #       - s3:GetObject
+  #     Resource: arn:aws:s3:::${self:provider.environment.PICTURE_BUCKET}/*
 # ---------------------------------------------------------------------------- #
 #                                   FUNCTIONS                                  #
 # ---------------------------------------------------------------------------- #
@@ -110,8 +106,17 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !GetAtt KMSKey.Arn
+      - Effect: Allow
+        Action:
           - secretsmanager:GetSecretValue
         Resource: !Ref RDSDBCKey
+      - Effect: Allow
+        Action:
+          - rds-data:CommitTransaction
+          - rds-data:ExecuteStatement
+        Resource: ${self:provider.environment.AURORA_CLUSTER_ARN}
 
   getDataInRange:
     handler: src/lambda/http/getDataInRange.handler
@@ -125,8 +130,17 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !GetAtt KMSKey.Arn
+      - Effect: Allow
+        Action:
           - secretsmanager:GetSecretValue
         Resource: !Ref RDSDBCKey
+      - Effect: Allow
+        Action:
+          - rds-data:CommitTransaction
+          - rds-data:ExecuteStatement
+        Resource: ${self:provider.environment.AURORA_CLUSTER_ARN}
 
   setPictureSeen:
     handler: src/lambda/http/setPictureSeen.handler
@@ -138,8 +152,21 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - kms:Decrypt
+        Resource: !GetAtt KMSKey.Arn
+      - Effect: Allow
+        Action:
           - secretsmanager:GetSecretValue
         Resource: !Ref RDSDBCKey
+      - Effect: Allow
+        Action:
+          - rds-data:CommitTransaction
+          - rds-data:ExecuteStatement
+        Resource: ${self:provider.environment.AURORA_CLUSTER_ARN}
+      - Effect: Allow
+        Action:
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.PICTURE_BUCKET}/*
 
   addPicture:
     handler: src/lambda/http/addPicture.handler
@@ -149,16 +176,56 @@ functions:
           path: pictures
           authorizer: Auth
           cors: true
+          reqValidatorName: RequestBodyValidator
+          request:
+            schema:
+              application/json: ${file(models/add-picture-request.json)}
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !GetAtt KMSKey.Arn
       - Effect: Allow
         Action:
           - secretsmanager:GetSecretValue
         Resource: !Ref RDSDBCKey
+      - Effect: Allow
+        Action:
+          - rds-data:CommitTransaction
+          - rds-data:ExecuteStatement
+        Resource: ${self:provider.environment.AURORA_CLUSTER_ARN}
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PICTURE_DATA_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: arn:aws:s3:::${self:provider.environment.PICTURE_BUCKET}/*
 
   # ! Post deployment function
   setupPostgresTable:
     handler: src/deployment/setupPostgres.handler
     timeout: 60
+    events:
+      - http:
+          method: get
+          path: wakeuppostgres
+          cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !GetAtt KMSKey.Arn
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource: !Ref RDSDBCKey
+      - Effect: Allow
+        Action:
+          - rds-data:CommitTransaction
+          - rds-data:ExecuteStatement
+        Resource: ${self:provider.environment.AURORA_CLUSTER_ARN}
 
 # ---------------------------------------------------------------------------- #
 #                                   RESOURCES                                  #
@@ -176,6 +243,15 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: ApiGatewayRestApi
+
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: "request-body-validator"
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
 
     RDSCluster:
       Type: AWS::RDS::DBCluster
@@ -259,3 +335,16 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.PICTURE_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 300
