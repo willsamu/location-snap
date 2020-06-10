@@ -23,11 +23,12 @@ plugins:
   - serverless-webpack
   - serverless-pseudo-parameters
   - serverless-plugin-scripts
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
   runtime: nodejs12.x
-  memorySize: 256
+  memorySize: 128
   apiGateway:
     minimumCompressionSize: 512 # Enable gzip compression for responses > 1 KB
 
@@ -48,7 +49,6 @@ provider:
     SEEN_TABLE_NAME: picture_seen_${self:provider.stage}
     PICTURE_DATA_TABLE: pictures-${self:provider.stage}
     PICTURE_DATA_CREATED_AT_INDEX: pictures-index-createdAt
-    # GET_PICTURE_BY_ID_INDEX: pictures-index-by-üictureId
     PICTURE_BUCKET: location-snap-pictures-${self:provider.stage}
     URL_EXPIRATION_TIME: 300
 
@@ -103,22 +103,30 @@ functions:
   syncWithPostgres:
     handler: src/lambda/streams/syncWithPostgres.handler
     timeout: 60
-    memorySize: 128
     events:
       - stream:
           type: dynamodb
           arn: !GetAtt PictureTable.StreamArn
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource: !Ref RDSDBCKey
 
   getDataInRange:
     handler: src/lambda/http/getDataInRange.handler
     timeout: 60 # in case of aurora cluster resuming
-    memorySize: 128
     events:
       - http:
           method: get
           path: data
           cors: true
           authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource: !Ref RDSDBCKey
 
   setPictureSeen:
     handler: src/lambda/http/setPictureSeen.handler
@@ -127,6 +135,11 @@ functions:
           method: post
           path: pictures/{pictureId}
           cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource: !Ref RDSDBCKey
 
   addPicture:
     handler: src/lambda/http/addPicture.handler
@@ -136,12 +149,16 @@ functions:
           path: pictures
           authorizer: Auth
           cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource: !Ref RDSDBCKey
 
   # ! Post deployment function
   setupPostgresTable:
     handler: src/deployment/setupPostgres.handler
     timeout: 60
-    memorySize: 128
 
 # ---------------------------------------------------------------------------- #
 #                                   RESOURCES                                  #
@@ -224,15 +241,6 @@ resources:
             KeyType: HASH
           - AttributeName: pictureId
             KeyType: RANGE
-        # GlobalSecondaryIndexes:
-        #   - IndexName: ${self:provider.environment.GET_PICTURE_BY_ID_INDEX}
-        #     KeySchema:
-        #       - AttributeName: pictureId
-        #         KeyType: HASH
-        #     Projection:
-        #       NonKeyAttributes:
-        #       - imageUrl
-        #       ProjectionType: INCLUDE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.PICTURE_DATA_TABLE}
         LocalSecondaryIndexes:
@@ -251,16 +259,3 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.PICTURE_BUCKET}
-        # CorsConfiguration:
-        #   CorsRules:
-        #     - AllowedOrigins:
-        #         - "*"
-        #       AllowedHeaders:
-        #         - "*"
-        #       AllowedMethods:
-        #         - GET
-        #         - PUT
-        #         - POST
-        #         - DELETE
-        #         - HEAD
-        #       MaxAge: 300
