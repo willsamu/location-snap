@@ -29,8 +29,8 @@ export const handler = middy(async (event: DynamoDBStreamEvent) => {
     const newItem = record.dynamodb.NewImage;
 
     const pictureId = newItem.pictureId.S;
-    const lat = newItem.lat.S;
-    const lon = newItem.lon.S;
+    const lat = newItem.lat.N;
+    const lon = newItem.lon.N;
 
     const sqlStatement = `
       INSERT
