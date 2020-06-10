@@ -8,12 +8,16 @@ import { createLogger } from "../../utils/logger";
 import { getUserId } from "../utils";
 
 const RDS = new AWS.RDSDataService();
+const s3 = new AWS.S3({
+  signatureVersion: "v4",
+});
 const logger = createLogger("GetDataInRange");
 
-var DBSecretsStoreArn = process.env.SECRET_STORE_ARN;
-var DBAuroraClusterArn = process.env.AURORA_CLUSTER_ARN;
-var databaseName = process.env.DATABASE_NAME;
-var seenTableName = process.env.SEEN_TABLE_NAME;
+const DBSecretsStoreArn = process.env.SECRET_STORE_ARN;
+const DBAuroraClusterArn = process.env.AURORA_CLUSTER_ARN;
+const databaseName = process.env.DATABASE_NAME;
+const seenTableName = process.env.SEEN_TABLE_NAME;
+const pictureBucket = process.env.PICTURE_BUCKET;
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -43,16 +47,19 @@ export const handler = middy(
       sql: setPictureSeenMutation,
     };
 
+    const imageUrl = getDownloadUrl(pictureId);
+
     try {
       let dbResponse = await RDS.executeStatement(params).promise();
-      logger.info("Added user to picture seen: ", [
+      logger.info("Added user to picture seen: ", {
         userId,
         pictureId,
         dbResponse,
-      ]);
+        imageUrl,
+      });
       return {
         statusCode: 200,
-        body: JSON.stringify(dbResponse),
+        body: JSON.stringify({ event: dbResponse, url: imageUrl }),
       };
     } catch (error) {
       logger.error(`Error executing sql request: ${error}`);
@@ -63,5 +70,13 @@ export const handler = middy(
     }
   },
 );
+
+function getDownloadUrl(pictureId: string) {
+  return s3.getSignedUrl("getObject", {
+    Bucket: pictureBucket,
+    Key: pictureId,
+    Expires: 20,
+  });
+}
 
 handler.use(cors({ credentials: true }));

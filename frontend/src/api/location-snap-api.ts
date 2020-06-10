@@ -3,7 +3,7 @@ import { SnapItem, SnapResult } from '../types/Snap'
 import Axios, { AxiosRequestConfig } from 'axios'
 import * as AxiosLogger from 'axios-logger'
 import { GetSnapsReqest, createSnapRequest } from 'types/Requests'
-import { createImageResponse } from 'types/Responses'
+import { createImageResponse, imageData } from 'types/Responses'
 
 const axios = Axios.create()
 axios.interceptors.request.use(AxiosLogger.requestLogger)
@@ -37,7 +37,7 @@ export async function createSnap(
   idToken: string,
   newSnap: createSnapRequest,
 ): Promise<createImageResponse> {
-  const response = await Axios.put(`${apiEndpoint}/pictures`, JSON.stringify(newSnap), {
+  const response = await axios.put(`${apiEndpoint}/pictures`, JSON.stringify(newSnap), {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${idToken}`,
@@ -69,17 +69,29 @@ export async function createSnap(
 //   })
 // }
 
-// export async function getUploadUrl(idToken: string, todoId: string): Promise<string> {
-//   const response = await Axios.post(`${apiEndpoint}/todos/${todoId}/attachment`, '', {
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${idToken}`,
-//     },
-//   })
-//   return response.data.uploadUrl
-// }
+export async function accessPicture(idToken: string, pictureId: string): Promise<string> {
+  const response = await axios.post(`${apiEndpoint}/pictures/${pictureId}`, '', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+  })
+  console.log('Result: ', response.data)
+  if (response.status !== 200) return '' //TODO: Error handling
+  return response.data.url
+}
+
+export async function getUploadUrl(idToken: string, todoId: string): Promise<string> {
+  const response = await axios.post(`${apiEndpoint}/todos/${todoId}/attachment`, '', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+  })
+  return response.data.uploadUrl
+}
 
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
-  const result = await Axios.put(uploadUrl, file)
+  const result = await axios.put(uploadUrl, file)
   console.log('Picture Upload: ', result)
 }
