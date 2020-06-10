@@ -21,7 +21,7 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
   const loggedIn = localStorage.getItem('isLoggedIn') == 'true'
   const [params, setParams] = useState({ lat: 0, lon: 0, range: 10000 })
   const [snaps, setSnaps] = useState([
-    // { id: '1', distance: 2 },
+    { id: '1', distance: 2 },
     { id: '2', distance: 5 },
   ] as SnapResult[])
 
@@ -47,7 +47,9 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
   }, [params])
 
   useEffect(() => {
-    if (snaps.length === (0 || 1 || 2) && loggedIn) {
+    console.log('Fetch snaps?', loggedIn)
+    if (snaps.length === (0 || 2) && loggedIn) {
+      console.log('YES!')
       fetchSnaps(auth.getIdToken(), params, setSnaps)
     }
   }, [snaps, loggedIn])

@@ -82,6 +82,7 @@ provider:
     - Effect: Allow
       Action:
         - s3:PutObject
+        - s3:GetObject
       Resource: arn:aws:s3:::${self:provider.environment.PICTURE_BUCKET}/*
 # ---------------------------------------------------------------------------- #
 #                                   FUNCTIONS                                  #
@@ -250,30 +251,16 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.PICTURE_BUCKET}
-        CorsConfiguration:
-          CorsRules:
-            - AllowedOrigins:
-                - "*"
-              AllowedHeaders:
-                - "*"
-              AllowedMethods:
-                - GET
-                - PUT
-                - POST
-                - DELETE
-                - HEAD
-              MaxAge: 300
-
-    BucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        PolicyDocument:
-          Id: MyPolicy
-          Version: "2012-10-17"
-          Statement:
-            - Sid: PublicReadForGetBucketObjects
-              Effect: Allow
-              Principal: "*"
-              Action: "s3:GetObject"
-              Resource: "arn:aws:s3:::${self:provider.environment.PICTURE_BUCKET}/*"
-        Bucket: !Ref PictureBucket
+        # CorsConfiguration:
+        #   CorsRules:
+        #     - AllowedOrigins:
+        #         - "*"
+        #       AllowedHeaders:
+        #         - "*"
+        #       AllowedMethods:
+        #         - GET
+        #         - PUT
+        #         - POST
+        #         - DELETE
+        #         - HEAD
+        #       MaxAge: 300

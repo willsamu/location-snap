@@ -22,12 +22,10 @@ const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
     resizeImage: true,
   })
   useEffect(() => {
-    console.log('FILES: ', files)
     if (!files || files.length === 0) return
     const reader = new FileReader()
     reader.onloadend = () => {
       setFile(files[0])
-      console.log('Res: ', reader.result)
       reader.result && setPreviewUrl(reader.result as string)
     }
     reader.readAsDataURL(files[0])

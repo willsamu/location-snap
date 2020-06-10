@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react'
 import Modal from 'react-modal'
 import { SpinnerRoundFilled } from 'spinners-react'
 
-import { Container, Image, customStyles } from './home.styled'
+import { Container, Image, MessageContainer, Message, customStyles } from './home.styled'
 import Card from '../Card/Card.react'
 import { SnapResult } from '../../../types/Snap'
 import Settings from '../Settings/Settings.react'
@@ -35,19 +35,32 @@ const Home: FunctionComponent<HomeProps> = ({
 
   return (
     <Container>
-      <Modal
-        isOpen={modalState.open}
-        onAfterOpen={afterOpenModal}
-        onRequestClose={closeModal}
-        style={customStyles}
-        contentLabel="Example Modal"
-      >
-        {modalState.url ? <Image src={modalState.url} /> : <SpinnerRoundFilled />}
-      </Modal>
-      <Settings {...settingsProps} />
-      {snaps.map((item) => (
-        <Card key={item.id} id={item.id} distance={item.distance} setModalState={setModalState} />
-      ))}
+      {idToken ? (
+        <div>
+          <Modal
+            isOpen={modalState.open}
+            onAfterOpen={afterOpenModal}
+            onRequestClose={closeModal}
+            style={customStyles}
+            contentLabel="Example Modal"
+          >
+            {modalState.url ? <Image src={modalState.url} /> : <SpinnerRoundFilled />}
+          </Modal>
+          <Settings {...settingsProps} />
+          {snaps.map((item) => (
+            <Card
+              key={item.id}
+              id={item.id}
+              distance={item.distance}
+              setModalState={setModalState}
+            />
+          ))}
+        </div>
+      ) : (
+        <MessageContainer>
+          <Message>Please Login To Acces Snaps!</Message>
+        </MessageContainer>
+      )}
     </Container>
   )
 }

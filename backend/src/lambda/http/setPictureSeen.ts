@@ -33,7 +33,7 @@ export const handler = middy(
     if (!validInput)
       return {
         statusCode: 422,
-        body: JSON.stringify("Caught your injection!"),
+        body: JSON.stringify("Caught your injection Paul!"),
       };
 
     const setPictureSeenMutation = `
