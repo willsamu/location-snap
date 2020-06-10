@@ -2,11 +2,10 @@ import * as AWS from "aws-sdk";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
 import { ExecuteStatementRequest } from "aws-sdk/clients/rdsdataservice";
-// import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
 
 import { createLogger } from "../../utils/logger";
-// import { v4String } from "uuid/interfaces";
+import { getUserId } from "../utils";
 
 const RDS = new AWS.RDSDataService();
 const logger = createLogger("GetDataInRange");
@@ -17,15 +16,24 @@ var databaseName = process.env.DATABASE_NAME;
 var seenTableName = process.env.SEEN_TABLE_NAME;
 
 export const handler = middy(
-  //   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  async (): Promise<APIGatewayProxyResult> => {
-    // TODO: Replace Mocked Data
-    // const pictureId: v4String = event.pathParameters.pictureId;
-    const pictureId: string = "E'c7af6d4d-8a8d-424b-b801-4f487b216495'";
-    const userId = 1;
+  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    const userId = getUserId(event);
+    const pictureId = event.pathParameters.pictureId;
+
+    // ? Validate Input
+    const v4 = new RegExp(
+      /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+    );
+    const validInput = pictureId.match(v4);
+    logger.info("Input: ", { userId, pictureId, validInput });
+    if (!validInput)
+      return {
+        statusCode: 422,
+        body: JSON.stringify("Caught your injection!"),
+      };
 
     const setPictureSeenMutation = `
-      INSERT INTO ${seenTableName} (SeenBy, PictureId) VALUES (${userId}, ${pictureId});
+      INSERT INTO ${seenTableName} (SeenBy, PictureId) VALUES ($id$${userId}$id$, $id$${pictureId}$id$);
     `;
 
     let params: ExecuteStatementRequest = {
