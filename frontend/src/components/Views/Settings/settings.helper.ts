@@ -14,4 +14,5 @@ export const handleUpload: Function = async (
   const snapData = await createSnap(idToken, location)
   await uploadFile(snapData.uploadUrl, file)
   console.log('ADDED SNAP!')
+  alert('Sucessfully Added Snap!')
 }

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState, useEffect } from 'react'
 
 import COLORS from '../colors'
-import { Container, PictureContainer, Button } from './card.styled'
+import { Container, PictureContainer, Button, Image } from './card.styled'
 import { FiCamera } from 'react-icons/fi'
 import { useFilePicker } from 'react-sage'
 import { createSnapRequest } from 'types/Requests'
@@ -13,7 +13,8 @@ type SettingsProps = {
 }
 
 const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
-  const [file, setFile] = useState({} as any)
+  const [file, setFile] = useState(undefined as any)
+  const [previewUrl, setPreviewUrl] = useState('')
   const { files, onClick, errors, HiddenFileInput } = useFilePicker({
     maxFileSize: 1,
     maxImageWidth: 1000,
@@ -22,8 +23,15 @@ const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
   })
   useEffect(() => {
     console.log('FILES: ', files)
-    if (!files) return
-    setFile(files[0] as File)
+    if (!files || files.length === 0) return
+    // setFile(files[0] as File)
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setFile(files[0])
+      console.log('Res: ', reader.result)
+      reader.result && setPreviewUrl(reader.result as string)
+    }
+    reader.readAsDataURL(files[0])
   }, [files])
   const handleClick = () => {
     handleUpload(file, idToken, params)
@@ -31,7 +39,12 @@ const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
   return (
     <Container>
       <PictureContainer>
-        <FiCamera size={40} color={COLORS.light} title="Add Picture" onClick={onClick} />
+        {file ? (
+          // <Image file={file} />
+          <img src={previewUrl}></img>
+        ) : (
+          <FiCamera size={40} color={COLORS.light} title="Add Picture" onClick={onClick} />
+        )}
         <HiddenFileInput accept=".jpg, jpeg, .png" multiple={false} />
         <Button disabled={!file} onClick={handleClick}>
           Upload Image

@@ -17,22 +17,6 @@ export const PictureContainer = styled.div`
   height: 150px;
   padding: 30px;
 `
-
-export const CaptionCotainer = styled.div`
-  margin-top: 48px;
-`
-
-export const Caption = styled.p`
-  font-size: 40px;
-  text-align: center;
-  color: ${COLORS.light};
-  font-weight: 600;
-  margin: 10px;
-`
-export const Distance = styled.p`
-  color: ${COLORS.contrast};
-`
-
 export const Button = styled.button`
   flex-grow: 1;
   align-self: center;
@@ -47,4 +31,10 @@ export const Button = styled.button`
   border-radius: 50px;
   background-position: 100% 0;
   margin-top: 30px;
+`
+
+// src: ${(props) => URL.createObjectURL(props.file)};
+export const Image = styled.img`
+  width: 50px;
+  height: 50px;
 `
