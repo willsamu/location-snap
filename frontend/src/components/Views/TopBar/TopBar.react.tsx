@@ -8,9 +8,8 @@ type TopBarType = {
 }
 
 const TopBar: FunctionComponent<TopBarType> = ({ auth }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem('isLoggedIn') == 'true',
-  )
+  const loginState = localStorage.getItem('isLoggedIn')
+  const [isAuthenticated, setIsAuthenticated] = useState(loginState == 'true')
   const [_, setCookie] = useCookies(['unlocked'])
 
   const handleLoginLogout = async () => {
@@ -24,12 +23,12 @@ const TopBar: FunctionComponent<TopBarType> = ({ auth }) => {
 
   useEffect(() => {
     localStorage.setItem('isLoggedIn', auth.getIdToken() == undefined ? 'false' : 'true')
-  })
+  }, [auth])
 
   useEffect(() => {
-    setIsAuthenticated(localStorage.getItem('isLoggedIn') == 'true')
-    console.log(`Session: ${auth.getIdToken()} \n ${localStorage.getItem('isLoggedIn')}`)
-  }, [localStorage.getItem('isLoggedIn')])
+    setIsAuthenticated(loginState == 'true')
+    console.log(`Session: ${auth.getIdToken()} \n ${loginState}`)
+  }, [loginState, auth])
 
   return (
     <Container>

@@ -1,9 +1,9 @@
 import { apiEndpoint } from '../config'
-import { SnapItem, SnapResult } from '../types/Snap'
-import Axios, { AxiosRequestConfig } from 'axios'
+import { SnapResult } from '../types/Snap'
+import Axios from 'axios'
 import * as AxiosLogger from 'axios-logger'
 import { GetSnapsReqest, createSnapRequest } from 'types/Requests'
-import { createImageResponse, imageData } from 'types/Responses'
+import { createImageResponse } from 'types/Responses'
 
 const axios = Axios.create()
 axios.interceptors.request.use(AxiosLogger.requestLogger)
@@ -46,28 +46,6 @@ export async function createSnap(
   console.log('Create Snap Response: ', response)
   return response.data
 }
-
-// export async function patchTodo(
-//   idToken: string,
-//   todoId: string,
-//   updatedTodo: UpdateTodoRequest,
-// ): Promise<void> {
-//   await Axios.patch(`${apiEndpoint}/todos/${todoId}`, JSON.stringify(updatedTodo), {
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${idToken}`,
-//     },
-//   })
-// }
-
-// export async function deleteTodo(idToken: string, todoId: string): Promise<void> {
-//   await Axios.delete(`${apiEndpoint}/todos/${todoId}`, {
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${idToken}`,
-//     },
-//   })
-// }
 
 export async function accessPicture(idToken: string, pictureId: string): Promise<string> {
   const response = await axios.post(`${apiEndpoint}/pictures/${pictureId}`, '', {

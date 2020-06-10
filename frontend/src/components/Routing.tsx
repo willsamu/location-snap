@@ -29,7 +29,7 @@ const AuthRouter: any = () => {
     if (cookies.unlocked !== isUnlocked) {
       setIsUnlocked(cookies.unlocked == 'true')
     }
-  }, [cookies])
+  }, [cookies, isUnlocked])
 
   useEffect(() => {
     cookies.unlocked == 'true' && wakeUpPostgres()

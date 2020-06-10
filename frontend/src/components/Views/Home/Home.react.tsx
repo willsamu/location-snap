@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, useEffect } from 'react'
+import React, { FunctionComponent } from 'react'
 import Modal from 'react-modal'
 import { SpinnerRoundFilled } from 'spinners-react'
 

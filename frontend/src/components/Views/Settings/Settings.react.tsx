@@ -15,7 +15,7 @@ type SettingsProps = {
 const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
   const [file, setFile] = useState(undefined as any)
   const [previewUrl, setPreviewUrl] = useState('')
-  const { files, onClick, errors, HiddenFileInput } = useFilePicker({
+  const { files, onClick, HiddenFileInput } = useFilePicker({
     maxFileSize: 1,
     maxImageWidth: 1000,
     imageQuality: 0.92,

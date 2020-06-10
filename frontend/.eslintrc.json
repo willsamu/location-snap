@@ -21,7 +21,8 @@
     "react/jsx-one-expression-per-line": 0,
     "object-literal-key-quotes": 0,
     "import/prefer-default-export": 1,
-    "react/react-in-jsx-scope": 0
+    "react/react-in-jsx-scope": 0,
+    "eqeqeq": 0
   },
   "settings": {
     "import/resolver": {

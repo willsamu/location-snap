@@ -7,12 +7,11 @@ function vhTOpx(value: number, padding: number) {
     d = document,
     e = d.documentElement,
     g = d.getElementsByTagName('body')[0],
-    x = w.innerWidth || e.clientWidth || g.clientWidth,
     y = w.innerHeight || e.clientHeight || g.clientHeight
 
   var result = (y * value) / 100
   // @ts-ignore
-  document.getElementById('root').innerHTML = result // affichage du résultat (facultatif)
+  document.getElementById('root').innerHTML = result
   return result - padding
 }
 
