@@ -5,6 +5,7 @@ export const handleUpload: Function = async (
   file: any,
   idToken: string,
   location: createSnapRequest,
+  setFile: Function,
 ) => {
   console.log('U P L O A D: ', location, file)
   if (!file) {
@@ -15,4 +16,5 @@ export const handleUpload: Function = async (
   await uploadFile(snapData.uploadUrl, file)
   console.log('ADDED SNAP!')
   alert('Sucessfully Added Snap!')
+  setFile(null)
 }

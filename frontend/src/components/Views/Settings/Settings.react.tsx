@@ -33,7 +33,7 @@ const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
     reader.readAsDataURL(files[0])
   }, [files])
   const handleClick = () => {
-    handleUpload(file, idToken, params)
+    handleUpload(file, idToken, params, setFile)
   }
   return (
     <Container>
