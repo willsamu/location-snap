@@ -59,6 +59,7 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
     auth,
     snaps,
     handleClick,
+    params,
   }
 
   return <Home {...homeProps} />

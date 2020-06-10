@@ -3,3 +3,8 @@ export interface GetSnapsReqest {
   lat: number
   lon: number
 }
+
+export interface createSnapRequest {
+  lat: string
+  long: string
+}

@@ -7,16 +7,15 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 350px;
+  justify-content: flex-start;
+  height: 150px;
   width: 300px;
-  margin-bottom: 20px;
+  margin-bottom: 80px;
 `
-export const CardContainer = styled.div`
+export const PictureContainer = styled.div`
   background-color: ${COLORS.primary};
-  width: 300px;
-  height: 300px;
-  border-radius: 20px;
+  height: 150px;
+  padding: 30px;
 `
 
 export const CaptionCotainer = styled.div`
@@ -37,11 +36,11 @@ export const Distance = styled.p`
 export const Button = styled.button`
   flex-grow: 1;
   align-self: center;
-  width: 160px;
+  width: 220px;
   font-size: 16px;
   font-weight: 600;
   color: #000;
-  height: 40px;
+  height: 25px;
   text-align: center;
   border: none;
   background-size: 300% 100%;

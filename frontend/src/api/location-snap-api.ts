@@ -2,7 +2,7 @@ import { apiEndpoint } from '../config'
 import { SnapItem, SnapResult } from '../types/Snap'
 import Axios, { AxiosRequestConfig } from 'axios'
 import * as AxiosLogger from 'axios-logger'
-import { GetSnapsReqest } from 'types/Requests'
+import { GetSnapsReqest, createSnapRequest } from 'types/Requests'
 
 const axios = Axios.create()
 axios.interceptors.request.use(AxiosLogger.requestLogger)
@@ -29,15 +29,15 @@ export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise
   return []
 }
 
-// export async function createTodo(idToken: string, newTodo: CreateTodoRequest): Promise<Todo> {
-//   const response = await Axios.post(`${apiEndpoint}/todos`, JSON.stringify(newTodo), {
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${idToken}`,
-//     },
-//   })
-//   return response.data.item
-// }
+export async function createSnap(idToken: string, newSnap: createSnapRequest): Promise<SnapItem> {
+  const response = await Axios.put(`${apiEndpoint}/pictures`, JSON.stringify(newSnap), {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
+    },
+  })
+  return response.data.item
+}
 
 // export async function patchTodo(
 //   idToken: string,
@@ -71,8 +71,8 @@ export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise
 //   return response.data.uploadUrl
 // }
 
-// export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
-//   await Axios.put(uploadUrl, file)
-// }
+export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
+  await Axios.put(uploadUrl, file)
+}
 
 export {}

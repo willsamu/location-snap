@@ -1,7 +1,10 @@
 import styled from 'styled-components'
 
+import COLORS from '../colors'
+
 export const Container = styled.div`
-  background-color: #fff;
+  padding-top: 120px;
+  background-color: ${COLORS.ps};
   height: 8000;
   display: flex;
   flex-direction: column;
@@ -9,7 +12,6 @@ export const Container = styled.div`
   justify-content: flex-start;
 `
 export const CardContainer = styled.div`
-  background-color: #000;
   width: 250px;
   height: 250px;
   border-radius: 20px;

@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState, useEffect } from 'react'
 
-import { Container } from './TopBar.styled'
+import { Button, Container, Name } from './TopBar.styled'
 import { useCookies } from 'react-cookie'
 
 type TopBarType = {
@@ -33,8 +33,8 @@ const TopBar: FunctionComponent<TopBarType> = ({ auth }) => {
 
   return (
     <Container>
-      <h1>WELCOME!</h1>
-      <button onClick={handleLoginLogout}>{isAuthenticated ? 'logout' : 'Login'}</button>
+      <Name>WELCOME!</Name>
+      <Button onClick={handleLoginLogout}>{isAuthenticated ? 'logout' : 'Login'}</Button>
     </Container>
   )
 }
