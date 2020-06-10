@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState, useEffect } from 'react'
 
 import COLORS from '../colors'
-import { Container, PictureContainer, Button, Image } from './card.styled'
+import { Container, PictureContainer, Button, Image } from './settings.styled'
 import { FiCamera } from 'react-icons/fi'
 import { useFilePicker } from 'react-sage'
 import { createSnapRequest } from 'types/Requests'
