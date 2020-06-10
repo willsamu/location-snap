@@ -19,7 +19,7 @@ export const Container = styled.div`
 export const Name = styled.p`
   font-size: 30px;
   color: ${COLORS.ps};
-  /* margin-top: -1px; */
+  font-weight: 450;
 `
 
 export const Button = styled.button`

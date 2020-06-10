@@ -2,12 +2,11 @@ import React, { FunctionComponent, useState, useEffect } from 'react'
 import Modal from 'react-modal'
 import { SpinnerRoundFilled } from 'spinners-react'
 
-import { Container, Image, MessageContainer, Message, customStyles } from './home.styled'
+import { Container, Image, MessageContainer, Message, Name, customStyles } from './home.styled'
 import Card from '../Card/Card.react'
 import { SnapResult } from '../../../types/Snap'
 import Settings from '../Settings/Settings.react'
 import { createSnapRequest } from 'types/Requests'
-import { accessPicture } from 'api/location-snap-api'
 import { ModalState } from './Home.connector'
 
 Modal.setAppElement('#root')
@@ -58,7 +57,8 @@ const Home: FunctionComponent<HomeProps> = ({
         </div>
       ) : (
         <MessageContainer>
-          <Message>Please Login To Acces Snaps!</Message>
+          <Message>Please Login To Acces </Message>
+          <Name>Location-Snap!</Name>
         </MessageContainer>
       )}
     </Container>

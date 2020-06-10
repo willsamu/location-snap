@@ -54,6 +54,14 @@ export const MessageContainer = styled.div`
 export const Message = styled.p`
   font-size: 40px;
   color: ${COLORS.light};
+  margin: 10px;
+  font-weight: 200;
+`
+
+export const Name = styled.p`
+  font-size: 50px;
+  color: ${COLORS.contrast};
+  font-weight: 500;
 `
 
 export const customStyles = {
