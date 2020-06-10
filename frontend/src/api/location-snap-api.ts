@@ -3,6 +3,7 @@ import { SnapItem, SnapResult } from '../types/Snap'
 import Axios, { AxiosRequestConfig } from 'axios'
 import * as AxiosLogger from 'axios-logger'
 import { GetSnapsReqest, createSnapRequest } from 'types/Requests'
+import { createImageResponse } from 'types/Responses'
 
 const axios = Axios.create()
 axios.interceptors.request.use(AxiosLogger.requestLogger)
@@ -11,12 +12,15 @@ export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise
   if (idToken) {
     console.log(`Fetching Snaps available.. ${idToken.length} | ${JSON.stringify(params)}`)
     try {
-      const response = await axios.get(`${apiEndpoint}/data?range=${params.range}&lat=34&lon=35`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
+      const response = await axios.get(
+        `${apiEndpoint}/data?range=${params.range}&lat=${params.lat}&lon=${params.lon}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
         },
-      })
+      )
       console.log('Snaps:', response)
       if (response.status !== 200) return []
       return response.data.items.sort((a: SnapResult, b: SnapResult) => a.distance - b.distance)
@@ -29,14 +33,18 @@ export async function getSnaps(idToken: string, params: GetSnapsReqest): Promise
   return []
 }
 
-export async function createSnap(idToken: string, newSnap: createSnapRequest): Promise<SnapItem> {
+export async function createSnap(
+  idToken: string,
+  newSnap: createSnapRequest,
+): Promise<createImageResponse> {
   const response = await Axios.put(`${apiEndpoint}/pictures`, JSON.stringify(newSnap), {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${idToken}`,
     },
   })
-  return response.data.item
+  console.log('Create Snap Response: ', response)
+  return response.data
 }
 
 // export async function patchTodo(
@@ -72,7 +80,6 @@ export async function createSnap(idToken: string, newSnap: createSnapRequest): P
 // }
 
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
-  await Axios.put(uploadUrl, file)
+  const result = await Axios.put(uploadUrl, file)
+  console.log('Picture Upload: ', result)
 }
-
-export {}
