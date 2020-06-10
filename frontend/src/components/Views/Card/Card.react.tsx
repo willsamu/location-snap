@@ -36,7 +36,7 @@ const Card: FunctionComponent<CardProps> = ({ id, distance, setModalState }) => 
           {!didOpen ? 'OPEN' : '...'}
         </Button>
       </CardContainer>
-      <Distance>{distance} KM AWAY</Distance>
+      <Distance>{distance <= 0 ? 'LESS THAN 1' : distance} KM AWAY</Distance>
     </Container>
   )
 }

@@ -19,7 +19,7 @@ export type ModalState = {
 
 const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
   const loggedIn = localStorage.getItem('isLoggedIn') == 'true'
-  const [params, setParams] = useState({ lat: 0, lon: 0, range: 10000 })
+  const [params, setParams] = useState({ lat: 0, lon: 0, range: 100 })
   const [snaps, setSnaps] = useState([{ id: '-1', distance: -1 }] as SnapResult[])
 
   const getPosition = async () => {
