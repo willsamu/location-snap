@@ -8,6 +8,7 @@ import Callback from './Views/Callback/Callback.react'
 import createHistory from 'history/createBrowserHistory'
 import TopBar from './Views/TopBar/TopBar.react'
 import Home from './Views/Home/Home.connector'
+import { wakeUpPostgres } from 'api/location-snap-api'
 const history = createHistory()
 
 const auth = new Auth(history)
@@ -30,14 +31,21 @@ const AuthRouter: any = () => {
     }
   }, [cookies])
 
+  useEffect(() => {
+    cookies.unlocked == 'true' && wakeUpPostgres()
+  }, [cookies])
+
   const handleUnlock = () => {
     if (appPassword === 'password') {
       setCookie('unlocked', 'true', { path: '/' })
       setIsUnlocked(true)
+      wakeUpPostgres()
     }
   }
+
   const onTextChange = (event: ChangeEvent<HTMLInputElement>) =>
     setAppPassword(event.target.value.trim())
+
   return (
     <Router history={history}>
       <div>

@@ -95,3 +95,7 @@ export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void>
   const result = await axios.put(uploadUrl, file)
   console.log('Picture Upload: ', result)
 }
+
+export async function wakeUpPostgres(): Promise<void> {
+  axios.get(`${apiEndpoint}/wakeuppostgres`)
+}
