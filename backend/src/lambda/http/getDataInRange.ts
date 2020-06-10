@@ -33,7 +33,6 @@ export const handler = middy(
         body: JSON.stringify(result.error),
       };
     }
-
     return {
       statusCode: 200,
       body: JSON.stringify({ items: transformResult(result.dbResponse) }),

@@ -14,3 +14,11 @@ export function getUploadUrl(pictureId: string) {
     Expires: parseInt(urlExpirationTime, 10),
   });
 }
+
+export function getDownloadUrl(pictureId: string) {
+  return s3.getSignedUrl("getObject", {
+    Bucket: pictureBucket,
+    Key: pictureId,
+    Expires: 20,
+  });
+}
