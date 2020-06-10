@@ -56,10 +56,10 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
   }
 
   const homeProps = {
-    auth,
+    idToken: auth.getIdToken(),
     snaps,
     handleClick,
-    params,
+    params: { lat: params.lat, lon: params.lon },
   }
 
   return <Home {...homeProps} />

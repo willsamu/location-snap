@@ -5,6 +5,6 @@ export interface GetSnapsReqest {
 }
 
 export interface createSnapRequest {
-  lat: string
-  long: string
+  lat: number
+  lon: number
 }

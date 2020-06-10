@@ -4,17 +4,17 @@ import { Container } from './home.styled'
 import Card from '../Card/Card.react'
 import { SnapResult } from '../../../types/Snap'
 import Settings from '../Settings/Settings.react'
-import { GetSnapsReqest } from 'types/Requests'
+import { createSnapRequest } from 'types/Requests'
 
 type HomeProps = {
-  auth?: any
+  idToken: string
   snaps: SnapResult[]
   handleClick: any
-  params: GetSnapsReqest
+  params: createSnapRequest
 }
 
-const Home: FunctionComponent<HomeProps> = ({ auth, snaps, handleClick, params }) => {
-  const settingsProps = { auth, params }
+const Home: FunctionComponent<HomeProps> = ({ idToken, snaps, handleClick, params }) => {
+  const settingsProps = { idToken, params }
   return (
     <Container>
       <Settings {...settingsProps} />

@@ -4,14 +4,14 @@ import COLORS from '../colors'
 import { Container, PictureContainer, Button } from './card.styled'
 import { FiCamera } from 'react-icons/fi'
 import { useFilePicker } from 'react-sage'
-import { GetSnapsReqest } from 'types/Requests'
+import { createSnapRequest } from 'types/Requests'
 
 type SettingsProps = {
-  auth: any
-  params: GetSnapsReqest
+  idToken: string
+  params: createSnapRequest
 }
 
-const Settings: FunctionComponent<SettingsProps> = ({ auth, params }) => {
+const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
   const [file, setFile] = useState({} as File)
   const { files, onClick, errors, HiddenFileInput } = useFilePicker({
     maxFileSize: 1,
