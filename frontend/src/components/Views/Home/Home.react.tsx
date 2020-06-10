@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react'
 import Modal from 'react-modal'
-import { SpinnerRoundFilled } from 'spinners-react'
+import { SpinnerRoundFilled, SpinnerDotted } from 'spinners-react'
 
 import { Container, Image, MessageContainer, Message, Name, customStyles } from './home.styled'
 import Card from '../Card/Card.react'
@@ -46,14 +46,18 @@ const Home: FunctionComponent<HomeProps> = ({
             {modalState.url ? <Image src={modalState.url} /> : <SpinnerRoundFilled />}
           </Modal>
           <Settings {...settingsProps} />
-          {snaps.map((item) => (
-            <Card
-              key={item.id}
-              id={item.id}
-              distance={item.distance}
-              setModalState={setModalState}
-            />
-          ))}
+          {snaps.length === 1 && snaps[0].id === '-1' ? (
+            <SpinnerDotted />
+          ) : (
+            snaps.map((item) => (
+              <Card
+                key={item.id}
+                id={item.id}
+                distance={item.distance}
+                setModalState={setModalState}
+              />
+            ))
+          )}
         </div>
       ) : (
         <MessageContainer>
