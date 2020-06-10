@@ -132,6 +132,7 @@ functions:
       - http:
           method: put
           path: pictures
+          authorizer: Auth
           cors: true
 
   # ! Post deployment function

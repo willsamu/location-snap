@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { createImageRequest } from "../../requests/createImageRequest";
 import { createLogger } from "../../utils/logger";
+import { getUserId } from "../utils";
 
 const dataTable = process.env.PICTURE_DATA_TABLE;
 const pictureBucket = process.env.PICTURE_BUCKET;
@@ -21,13 +22,12 @@ const logger = createLogger("AddPicture");
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     // TODO: Replace Mocked Data
-    const userId = "1";
+    const userId = getUserId(event);
 
     const pictureId = uuid();
     const newImageObject = await createImage(userId, pictureId, event);
 
     const uploadUrl = getUploadUrl(pictureId);
-    logger.info("Data to be returned:");
 
     return {
       statusCode: 201,
@@ -54,7 +54,7 @@ async function createImage(
     ...newImage,
     imageUrl: `https://${pictureBucket}.s3.amazonaws.com/${pictureId}`,
   };
-  console.log("Storing new item: ", newImageObject);
+  logger.info("Storing new item: ", newImageObject);
 
   await docClient
     .put({
