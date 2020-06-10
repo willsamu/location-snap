@@ -25,7 +25,7 @@ export type ModalState = {
 const Home: FunctionComponent<HomeProps> = ({ idToken, snaps, handleClick, params }) => {
   const settingsProps = { idToken, params }
 
-  const [modalState, setModalState] = React.useState({
+  const [modalState, setModalState] = useState({
     open: false,
     id: '',
     counter: 10,
@@ -47,6 +47,24 @@ const Home: FunctionComponent<HomeProps> = ({ idToken, snaps, handleClick, param
   function closeModal() {
     setModalState((oldState) => ({ open: !oldState.open, id: oldState.id, counter: 10 }))
   }
+  useEffect(() => {
+    let timer = 0
+    if (modalState.open && modalState.counter > 0) {
+      timer = setInterval(
+        () =>
+          setModalState(
+            (oldState: ModalState) =>
+              ({
+                counter: oldState.counter - 1,
+                open: oldState.open,
+                id: oldState.id,
+              } as ModalState),
+          ),
+        1000,
+      )
+    } else if (modalState.open) setModalState((oldState) => ({ open: false, id: '', counter: 10 }))
+    return () => clearInterval(timer)
+  }, [modalState])
 
   return (
     <Container>
@@ -58,6 +76,7 @@ const Home: FunctionComponent<HomeProps> = ({ idToken, snaps, handleClick, param
         contentLabel="Example Modal"
       >
         <p>HELLO WORLD</p>
+        <p>{modalState.counter}</p>
       </Modal>
       <Settings {...settingsProps} />
       <button onClick={handleClick}>Press me</button>
