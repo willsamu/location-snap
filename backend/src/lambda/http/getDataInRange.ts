@@ -1,34 +1,13 @@
 import * as AWS from "aws-sdk";
 import * as middy from "middy";
 import { cors } from "middy/middlewares";
-import { ExecuteStatementRequest } from "aws-sdk/clients/rdsdataservice";
 import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
-import * as https from "https";
 
-import { createLogger } from "../../utils/logger";
 import { LocationRequest } from "../../requests/LocationRequest";
 import { DataInRange } from "../../models/DataInRange";
 import { getUserId } from "../utils";
-
-const sslAgent = new https.Agent({
-  keepAlive: true,
-  maxSockets: 50,
-  rejectUnauthorized: true,
-});
-
-AWS.config.update({ httpOptions: { agent: sslAgent } });
-
-let RDS = null;
-
-if (!RDS) RDS = new AWS.RDSDataService();
-
-const logger = createLogger("GetDataInRange");
-
-var DBSecretsStoreArn = process.env.SECRET_STORE_ARN;
-var DBAuroraClusterArn = process.env.AURORA_CLUSTER_ARN;
-var databaseName = process.env.DATABASE_NAME;
-var locationTableName = process.env.LOCATION_TABLE_NAME;
-var seenTableName = process.env.SEEN_TABLE_NAME;
+import { getData } from "../../businessLogic/getDataInRange";
+import { DataApiResponse } from "../../models/DataApiResponse";
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -41,46 +20,27 @@ export const handler = middy(
 
     const rangeInMeter = userLocation.range * 10 ** 3;
     const userId = getUserId(event);
-    logger.info("Request passed: ", [userLocation, userId]);
 
-    const getDataInRange = `
-      SELECT PictureId, ST_Distance(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography) FROM ${locationTableName} 
-      WHERE
-        ST_DWithin(geom, ST_MakePoint(${userLocation.lat}, ${userLocation.lon})::geography, ${rangeInMeter})
-        AND 
-        NOT EXISTS (
-          SELECT 1
-          FROM ${seenTableName}
-          WHERE
-            ${seenTableName}.PictureId = ${locationTableName}.PictureId
-            AND
-            ${seenTableName}.SeenBy = $id$${userId}$id$::VARCHAR(64)
-        )
-      LIMIT 100  
-      ;  
-    `;
+    const result = (await getData(
+      userLocation,
+      rangeInMeter,
+      userId,
+    )) as DataApiResponse;
 
-    let params: ExecuteStatementRequest = {
-      database: databaseName,
-      resourceArn: DBAuroraClusterArn,
-      secretArn: DBSecretsStoreArn,
-      sql: getDataInRange,
-    };
-
-    try {
-      let dbResponse = await RDS.executeStatement(params).promise();
-      logger.info("Result: ", { request: params, response: dbResponse });
-
+    if (result.error) {
       return {
-        statusCode: 200,
-        body: JSON.stringify({ items: transformResult(dbResponse) }),
+        statusCode: 400,
+        body: JSON.stringify(result.error),
       };
-    } catch (error) {
-      logger.error(`Error executing sql request: ${error}`);
-      return { statusCode: 400, body: JSON.stringify(error) };
     }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ items: transformResult(result.dbResponse) }),
+    };
   },
 );
+
 /**
  * @description Validates Request Input and Prevents SQL Injection
  */
@@ -90,7 +50,6 @@ function validateInput(event: APIGatewayProxyEvent): LocationRequest {
     const lat = event.queryStringParameters.lat;
     const lon = event.queryStringParameters.lon;
     if (!(range || lat || lon)) return null;
-    logger.info("Recieved parameters", { range, lat, lon });
 
     const latitude = parseFloat(lat);
     if (latitude > 180 || latitude < -180)
@@ -105,7 +64,6 @@ function validateInput(event: APIGatewayProxyEvent): LocationRequest {
       range: range,
     };
   } catch (e) {
-    logger.error(`INPUT ERROR: ${e}`);
     return null;
   }
 }
