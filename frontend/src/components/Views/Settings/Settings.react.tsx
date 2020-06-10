@@ -24,7 +24,6 @@ const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
   useEffect(() => {
     console.log('FILES: ', files)
     if (!files || files.length === 0) return
-    // setFile(files[0] as File)
     const reader = new FileReader()
     reader.onloadend = () => {
       setFile(files[0])
@@ -40,8 +39,7 @@ const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
     <Container>
       <PictureContainer>
         {file ? (
-          // <Image file={file} />
-          <img src={previewUrl}></img>
+          <Image src={previewUrl} />
         ) : (
           <FiCamera size={40} color={COLORS.light} title="Add Picture" onClick={onClick} />
         )}

@@ -33,8 +33,7 @@ export const Button = styled.button`
   margin-top: 30px;
 `
 
-// src: ${(props) => URL.createObjectURL(props.file)};
 export const Image = styled.img`
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
 `
