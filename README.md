@@ -43,6 +43,8 @@ Open AWS Console -> Secrets Manager, select `snap-rds-key-{stage}`, and insert a
 }
 ```
 
+Uncomment/Add the `RDSCluster` again.
+
 Finally and for further deploys, run `sls deploy` again.
 
 ## Frontend
