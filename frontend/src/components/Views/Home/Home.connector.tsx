@@ -44,12 +44,10 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
   }, [params])
 
   useEffect(() => {
-    console.log('Fetch snaps?', loggedIn)
-    if (loggedIn) {
-      console.log('YES!')
+    if (loggedIn && snaps.length === 1 && snaps[0].id === '-1') {
       fetchSnaps(auth.getIdToken(), params, setSnaps)
     }
-  }, [snaps, loggedIn, auth, params])
+  }, [snaps, loggedIn])
 
   const [modalState, setModalState] = useState({
     open: false,
@@ -58,7 +56,6 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
   } as ModalState)
 
   const afterOpenModal = () => {
-    console.log('CLOSED MODAL!')
     getImageData(auth.getIdToken(), modalState.id, setModalState)
   }
 
