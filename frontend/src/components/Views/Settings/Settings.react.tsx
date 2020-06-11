@@ -41,7 +41,7 @@ const Settings: FunctionComponent<SettingsProps> = ({ idToken, params }) => {
         ) : (
           <FiCamera size={40} color={COLORS.light} title="Add Picture" onClick={onClick} />
         )}
-        <HiddenFileInput accept=".jpg, jpeg, .png" multiple={false} />
+        <HiddenFileInput accept=".jpg, .jpeg, .png" multiple={false} />
         <Button disabled={!file} onClick={handleClick}>
           Upload Image
         </Button>
