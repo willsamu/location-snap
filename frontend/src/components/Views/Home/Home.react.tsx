@@ -46,7 +46,7 @@ const Home: FunctionComponent<HomeProps> = ({
             {modalState.url ? <Image src={modalState.url} /> : <SpinnerRoundFilled />}
           </Modal>
           <Settings {...settingsProps} />
-          {snaps.length === 1 && snaps[0].id === '-1' ? (
+          {snaps.length === 1 && (snaps[0].id === '-1' || snaps[0].id === '-2') ? (
             <SpinnerDotted />
           ) : (
             snaps.map((item) => (

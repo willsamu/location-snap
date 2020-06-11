@@ -45,9 +45,11 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
 
   useEffect(() => {
     if (loggedIn && snaps.length === 1 && snaps[0].id === '-1') {
+      setSnaps([{ id: '-2', distance: -1 }])
       fetchSnaps(auth.getIdToken(), params, setSnaps)
     }
   }, [snaps, loggedIn])
+  console.log(`State: ${JSON.stringify(snaps)}`)
 
   const [modalState, setModalState] = useState({
     open: false,
@@ -66,7 +68,7 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
 
   useEffect(() => {
     let timer = 0
-    if (modalState.open && modalState.counter > 0) {
+    if (modalState.open && modalState.counter > 0 && modalState.url) {
       timer = setInterval(
         () =>
           setModalState(
@@ -80,7 +82,7 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
           ),
         1000,
       )
-    } else if (modalState.id) {
+    } else if (modalState.id && modalState.url) {
       setSnaps((snaps) => snaps.filter(({ id }) => id !== modalState.id))
       setModalState(() => ({ open: false, id: '', counter: 10, url: '' }))
     }
