@@ -12,7 +12,7 @@ import { formatToPsm } from "../../auth/utils";
 
 const logger = createLogger("auth");
 
-const jwksUrl = "https://lambda-todo.eu.auth0.com/.well-known/jwks.json";
+const jwksUrl = "https://lambda-todo.eu.auth0.com/.well-known/jwks.json"; //TODO: Replace with your url
 let certificate: string = ""; // cache certificate
 
 export const handler = async (

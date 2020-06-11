@@ -49,7 +49,6 @@ const ConnectedHome: FunctionComponent<ConnectorProps> = ({ auth }) => {
       fetchSnaps(auth.getIdToken(), params, setSnaps)
     }
   }, [snaps, loggedIn])
-  console.log(`State: ${JSON.stringify(snaps)}`)
 
   const [modalState, setModalState] = useState({
     open: false,
