@@ -9,6 +9,7 @@ import createHistory from 'history/createBrowserHistory'
 import TopBar from './Views/TopBar/TopBar.react'
 import Home from './Views/Home/Home.connector'
 import { wakeUpPostgres } from 'api/location-snap-api'
+import { reactPassword } from 'config'
 const history = createHistory()
 
 const auth = new Auth(history)
@@ -36,7 +37,7 @@ const AuthRouter: any = () => {
   }, [cookies])
 
   const handleUnlock = () => {
-    if (appPassword === 'password') {
+    if (appPassword.toLowerCase().trim() === reactPassword) {
       setCookie('unlocked', 'true', { path: '/' })
       setIsUnlocked(true)
       wakeUpPostgres()
