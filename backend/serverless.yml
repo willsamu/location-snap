@@ -13,7 +13,7 @@ custom:
     hooks:
       "deploy:finalize": sls invoke -f setupPostgresTable
 
-  #* References
+  #* References optionally add -${self:provider.stage}
   databaseSecret: ${ssm:/aws/reference/secretsmanager/snap-rds-key~true}
   clusterIdentifier: location-snap-cluster
 
