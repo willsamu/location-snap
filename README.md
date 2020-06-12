@@ -4,9 +4,9 @@ Project Integrating Location based picture posting and Viewing.
 
 # Contents:
 
-- About
-- Demo
-- Setup
+- [About](#about)
+- [Demo](#demo)
+- [Setup](#setup)
 
 # About
 
@@ -28,11 +28,11 @@ The whole application has been developed using the serverless framework, AWS and
 
 ![Stack Diagram](diagram.png)
 
-While the whole application could have been developed using a single database, it has been split into using DynamoDB for image metadata and Postgres (with Postgis) to process location related data:
+While the whole application could have been developed using a single database, it has been split into using DynamoDB for image metadata and Postgres to process location related data:
 
 Postgres is hosted on an AWS RDS Aurora Serverless cluster, thus making the whole application completly 'serverless' without even the need to provision instances.
 
-With the underlying R-Tree structure, Postgres with the PostGIS is very efficient at processing location distance queries (implementation chosen is EPSG 4326 with Cartesian plane instead of gegraphical sphere).
+With the underlying R-Tree structure, Postgres with the PostGIS extension is very efficient at processing location distance queries (implementation chosen is EPSG 4326 with Cartesian plane instead of gegraphical sphere, which results in cheaper computational costs butsome precision loss on longer distances).
 
 Choosing this implementation, location-based queries are faster and also much cheaper than with DynamoDB, while at the same time implementing DynamoDB offers easy and efficient future implementation of additional features (for example, adding user interaction such as liking / commenting on pictures).
 
