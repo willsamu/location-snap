@@ -2,7 +2,7 @@
 
 Project Integrating Location based picture posting and Viewing.
 
-# Contents:
+### Content:
 
 - [About](#about)
 - [Demo](#demo)
