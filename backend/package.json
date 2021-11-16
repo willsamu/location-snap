@@ -20,7 +20,7 @@
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^10.12.18",
     "@types/uuid": "^8.0.0",
-    "aws-sdk": "^2.691.0",
+    "aws-sdk": "^2.814.0",
     "fork-ts-checker-webpack-plugin": "^3.0.1",
     "serverless-iam-roles-per-function": "^2.0.2",
     "serverless-plugin-scripts": "^1.0.2",
